@@ -1,11 +1,11 @@
 ---
 id: 001
 title: Readiness proto, module skeleton, and service wiring
-status: pending
+status: tests-written
 depends_on: []
 touches: [web/proto/anki/readiness.proto, web/rslib/proto/src/lib.rs, web/rslib/src/lib.rs, web/rslib/src/readiness/mod.rs, web/rslib/src/readiness/service.rs]
 iterations: 0
-test_files: []
+test_files: [web/rslib/src/readiness/tests.rs]
 branch: ""
 ---
 
@@ -58,6 +58,27 @@ repeated `missing_evidence`.
 
 ## Test plan
 
-Written by the test-writer agent.
+Tests in `web/rslib/src/readiness/tests.rs`, declared from `mod.rs` via
+`#[cfg(test)] mod tests;` — matching existing precedent at
+`rslib/src/sync/collection/tests.rs` and `rslib/src/import_export/package/colpkg/tests.rs`.
+
+| Criterion | Test |
+|---|---|
+| proto compiles, types reachable | `proto_types_are_reachable` (shape check, passes pre-impl) |
+| both RPCs callable | `both_rpcs_are_callable_on_a_collection` |
+| empty collection → 3 abstaining Scores | `three_scores_abstains_without_evidence` |
+| empty collection → empty topic list, no error | `topic_mastery_returns_an_empty_list_rather_than_erroring` |
+| state enum default UNKNOWN | `mastery_state_default_is_unknown` (shape check, passes pre-impl) |
+
+## Deviations from the ticket as written
+
+- **AC said `Score.state`; implemented as `TopicMastery.state`.** The ticket's own
+  message spec placed `state` on `TopicMastery`, and `Score` has no such field —
+  the criterion contradicted the spec above it. Resolved in favour of the message
+  spec: nested `State` enum on `TopicMastery`, matching Anki's
+  `revlog_entry::ReviewKind` style. Flagged by the test-writer, accepted by the
+  orchestrator.
+- Tests relocated out of an inline `mod test` block in `service.rs` into a separate
+  `tests.rs`, so the implementation file is editable while tests stay locked.
 
 ## Attempt log
