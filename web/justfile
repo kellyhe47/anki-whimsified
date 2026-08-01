@@ -30,6 +30,14 @@ rebuild-web:
 wheels:
     {{ ninja }} wheels
 
+# Build the desktop app bundle with Briefcase (no packaging step)
+installer-build:
+    {{ ninja }} installer:build
+
+# Build and package the platform desktop installer with Briefcase
+installer:
+    {{ ninja }} installer:package
+
 # Build and run all checks (lint + test) - lets ninja handle dependencies
 check:
     {{ ninja }} pylib qt check

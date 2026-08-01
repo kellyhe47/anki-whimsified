@@ -35,5 +35,7 @@ If you want to use a string in your code that can't be translated, please use:
     <!-- Bottom Nav Bar: In progress for GSoC 2026 -->
     <string name="bottom_nav_more" maxLength="28">More</string>
     <string name="bottom_nav_browse" maxLength="28">Browse</string>
+    <!-- Exam Readiness: in progress, do not translate -->
+    <string name="exam_readiness_do_not_translate" comment="Do not translate this string, this feature is still in development. Title of the exam readiness screen.">Exam readiness</string>
 </resources>
 

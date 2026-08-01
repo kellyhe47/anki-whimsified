@@ -158,6 +158,7 @@ import com.ichi2.anki.observability.ChangeManager
 import com.ichi2.anki.pages.AnkiPackageImporterFragment
 import com.ichi2.anki.pages.CongratsPage
 import com.ichi2.anki.pages.CongratsPage.Companion.onDeckCompleted
+import com.ichi2.anki.readiness.ReadinessFragment
 import com.ichi2.anki.receiver.SdCardReceiver
 import com.ichi2.anki.reviewreminders.ReviewReminderScope
 import com.ichi2.anki.reviewreminders.ReviewRemindersDatabase
@@ -1354,6 +1355,11 @@ open class DeckPicker :
                     supportFragmentManager,
                     EmptyCardsDialogFragment.TAG,
                 )
+                return true
+            }
+            R.id.action_exam_readiness -> {
+                Timber.i("DeckPicker:: Exam readiness button pressed")
+                startActivity(ReadinessFragment.getIntent(this))
                 return true
             }
             R.id.action_model_browser_open -> {
