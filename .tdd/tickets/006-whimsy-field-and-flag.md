@@ -1,7 +1,7 @@
 ---
 id: 006
 title: Whimsy cue field, strip flag, and neutral-test guarantee
-status: tests-written
+status: green
 depends_on: [001]
 touches: [web/rslib/src/readiness/mnemonic.rs, web/rslib/src/readiness/mod.rs, web/rslib/src/config/]
 iterations: 0
@@ -36,4 +36,30 @@ File: `web/rslib/src/readiness/mnemonic.rs`, plus a config key.
 
 Written by the test-writer agent.
 
+## Contracts established here (referenced by later tickets)
+
+Invented by the test-writer because the ticket left them undefined, reviewed and
+accepted by the orchestrator:
+
+- Neutral-test marker is a note tag `neutral-test`, deliberately NOT `mcat::`-prefixed
+  so it cannot collide with ticket 002's topic derivation.
+- Cue and concept map live in note fields `Whimsy` and `ConceptMap`.
+- Rendered output wraps them in `.whimsy-cue` and `.concept-map`.
+- The strip is a post-render pass, never a destructive edit to stored notes.
+- The card template must use a conditional `{{#Whimsy}}` section — criteria 3 and 7
+  together forbid emitting the wrapper for an empty cue field.
+
+Ticket 010 (deck generation) must honour all of the above.
+
 ## Attempt log
+
+- iter 1: green. 12 tests pass (ticket said 13 — my miscount, no test skipped).
+  Full Rust suite 582/582.
+- Commits: tests `4360ff02e`, implementation `d63961066`.
+- **Upstream file touched: `web/rslib/src/notetype/render.rs`** — the render-time
+  strip hook. Outside this ticket's declared `touches`, and necessary: the strip
+  must happen where cards are rendered. Friday requires listing upstream files
+  touched, so this belongs in the README and proof document.
+- `field_bears_evidence` is currently dead code in non-test builds (nothing counts
+  evidence from note fields yet). Left without an `#[allow]`; ticket 008's evidence
+  firewall is its consumer.

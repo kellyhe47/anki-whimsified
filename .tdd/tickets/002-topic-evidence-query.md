@@ -1,7 +1,7 @@
 ---
 id: 002
 title: Topic evidence query (single SQL pass)
-status: tests-written
+status: green
 depends_on: [001]
 touches: [web/rslib/src/readiness/evidence.rs, web/rslib/src/readiness/mod.rs]
 iterations: 0
@@ -66,3 +66,27 @@ one statement AND that a 30-topic collection costs the same as a 1-topic one.
   rather than dropping them silently.
 
 ## Attempt log
+
+- iter 1: green. Single recursive-CTE query; trace hook confirms 1 statement for
+  1 topic and 1 for 30. Full Rust suite 582/582.
+- Commits: tests `4360ff02e`, implementation `d63961066`.
+
+### KNOWN LIMITATION — carry into the proof document
+
+The one-query constraint forced a deviation on FSRS timing. Normally
+`extract_fsrs_retrievability` takes its timing from `Collection::timing_today()`,
+but that call is not free: on a cold cache it issues ~10 statements and *writes*
+config (`localOffset`, `rollover`), which breaks the single-statement guarantee.
+Instead `now` is bound from Rust and the day count derived in-statement as
+`(now - col.crt) / 86400`.
+
+Impact: that day count is only read for cards with **no** `last_review_time`.
+For every other card the retrievability is exact. For the legacy no-`lrt` case
+the count can be off by **≤1 day** versus the rollover-aware v2 count.
+
+Accepted rather than fixed, because the alternative is re-running
+`sched_timing_today` in Rust with per-card aggregation — duplicating upstream
+scheduler logic, which costs more against the "how well it fits Anki" criterion
+than a documented ≤1-day drift on legacy cards costs against score accuracy.
+**This must appear in the proof document's known-limitations section, not be
+quietly omitted.**
