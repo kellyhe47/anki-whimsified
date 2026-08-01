@@ -1,7 +1,7 @@
 ---
 id: 004
 title: Three scores, ranges, and the give-up rule
-status: tests-written
+status: green
 depends_on: [003]
 touches: [web/rslib/src/readiness/scores.rs, web/rslib/src/readiness/mod.rs]
 iterations: 0

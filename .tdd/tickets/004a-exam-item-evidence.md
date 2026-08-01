@@ -1,7 +1,7 @@
 ---
 id: 004a
 title: Exam-item evidence source (objective correctness for Performance)
-status: tests-written
+status: green
 depends_on: [002]
 touches: [web/rslib/src/readiness/exam_items.rs, web/rslib/src/readiness/evidence.rs, web/rslib/src/readiness/mod.rs, web/rslib/src/storage/]
 iterations: 0

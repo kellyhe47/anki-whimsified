@@ -17,10 +17,9 @@
 //! Exam-item answers feed Performance only; non-exam cards feed Memory only.
 //! The give-up rule's graded-review count is unaffected: it spans every graded
 //! review in the collection, exam item or not.
-//!
-//! Nothing is implemented here yet -- ticket 004a is red by construction.
 
 use crate::prelude::*;
+use crate::typeanswer::compare_answer;
 
 /// The note tag that marks a note as an exam-style item.
 ///
@@ -53,9 +52,14 @@ pub(crate) struct TopicExamItems {
     pub exam_items_correct: u32,
 }
 
+/// The marker the typed-answer comparison emits between what was typed and what
+/// was expected. It appears only when the two differ, so its absence is that
+/// comparison's own verdict of "correct".
+const TYPED_ANSWER_MISMATCH_MARKER: &str = "typearrow";
+
 /// Whether a note's tags mark it as an exam-style item.
-pub(crate) fn is_exam_item(_tags: &[String]) -> bool {
-    todo!("ticket 004a: identify exam-style items by tag")
+pub(crate) fn is_exam_item(tags: &[String]) -> bool {
+    tags.iter().any(|tag| tag == EXAM_ITEM_TAG)
 }
 
 /// Whether a typed answer is objectively correct.
@@ -63,8 +67,18 @@ pub(crate) fn is_exam_item(_tags: &[String]) -> bool {
 /// This must agree with the comparison behind `{{type:Field}}` rendering: the
 /// answer is correct exactly when that comparison reports a full match. An
 /// empty typed answer is never correct.
-pub(crate) fn answer_matches(_expected: &str, _typed: &str) -> bool {
-    todo!("ticket 004a: objective correctness from the typed-answer comparison")
+///
+/// Rather than write a second, independent notion of correctness -- which could
+/// silently drift into being laxer than the one the learner sees on the card --
+/// this delegates to [`compare_answer`] and reads its verdict. `combining` is
+/// false, matching the default rendering path.
+pub(crate) fn answer_matches(expected: &str, typed: &str) -> bool {
+    if typed.is_empty() {
+        // `compare_answer` renders the expected text alone for an empty answer,
+        // which carries no mismatch marker. Nothing typed is nothing correct.
+        return false;
+    }
+    !compare_answer(expected, typed, false).contains(TYPED_ANSWER_MISMATCH_MARKER)
 }
 
 impl Collection {
@@ -74,18 +88,27 @@ impl Collection {
     /// saw, and is deliberately not consulted when deciding correctness.
     pub(crate) fn record_exam_item_answer(
         &mut self,
-        _card_id: CardId,
-        _expected: &str,
-        _typed: &str,
+        card_id: CardId,
+        expected: &str,
+        typed: &str,
+        // The learner's self-assessment. Counting it as evidence of objective
+        // correctness would launder self-rated ease into a DOK 2--3 claim, so it
+        // is bound and dropped here on purpose.
         _button_chosen: u8,
-        _answered_at: TimestampSecs,
+        answered_at: TimestampSecs,
     ) -> Result<ExamItemAnswer> {
-        todo!("ticket 004a: record objective exam-item correctness")
+        let answer = ExamItemAnswer {
+            card_id,
+            answered_at,
+            matched: answer_matches(expected, typed),
+        };
+        self.storage.add_exam_item_answer(&answer)?;
+        Ok(answer)
     }
 
     /// Every recorded exam-item answer, oldest first.
     pub(crate) fn exam_item_answers(&mut self) -> Result<Vec<ExamItemAnswer>> {
-        todo!("ticket 004a: read back recorded exam-item answers")
+        self.storage.all_exam_item_answers()
     }
 
     /// Per-topic exam-item counts across the collection.
@@ -93,6 +116,6 @@ impl Collection {
     /// A topic with exam items that nobody has answered still appears, with
     /// zero counts: "not attempted" is a different claim from "not present".
     pub(crate) fn topic_exam_items(&mut self) -> Result<Vec<TopicExamItems>> {
-        todo!("ticket 004a: aggregate exam-item answers by topic")
+        self.storage.topic_exam_item_counts()
     }
 }

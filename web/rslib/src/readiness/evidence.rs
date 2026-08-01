@@ -9,6 +9,7 @@
 //! tickets.
 
 use crate::prelude::*;
+use crate::readiness::exam_items::EXAM_ITEM_TAG;
 use crate::revlog::RevlogReviewKind;
 
 /// Note tags of the form `mcat::<section>::<topic>` name a topic. Tags without
@@ -63,8 +64,15 @@ const GRADED_REVIEW_KINDS: &[RevlogReviewKind] = &[
 /// -- is passed as zero. The derived day count is only consulted for cards
 /// that have no recorded last review time; for every other card the answer is
 /// exact.
+///
+/// Cards of exam-item notes are excluded from the retrievability average, and
+/// from that alone. Retrievability is the memory score's evidence, and memory is
+/// DOK 1 flashcard recall: an exam item is not a flashcard, so its recall must
+/// not move that average. Its *reviews* still count -- the give-up rule spans
+/// every graded review in the collection, exam item or not.
 fn evidence_sql() -> String {
     let prefix = TOPIC_TAG_PREFIX;
+    let exam_item_tag = EXAM_ITEM_TAG;
     // `substr` is 1-based, so the topic name starts one past the prefix.
     let topic_starts_at = prefix.len() + 1;
     let graded_kinds = GRADED_REVIEW_KINDS
@@ -91,6 +99,11 @@ topics as (
      where tag like '{prefix}%'
        and length(tag) > {prefix_len}
 ),
+exam_notes as (
+    select distinct nid
+      from split
+     where tag = '{exam_item_tag}'
+),
 graded as (
     select cid, count(*) as reviews
       from revlog
@@ -101,16 +114,17 @@ select t.topic,
        count(distinct c.id),
        count(distinct case when coalesce(g.reviews, 0) > 0 then c.id end),
        coalesce(sum(coalesce(g.reviews, 0)), 0),
-       avg(extract_fsrs_retrievability(
+       avg(case when x.nid is null then extract_fsrs_retrievability(
                c.data,
                case when c.odue != 0 then c.odue else c.due end,
                c.ivl,
                (select max((?1 - crt) / 86400, 0) from col),
                0,
-               ?1))
+               ?1) end)
   from topics t
   join cards c on c.nid = t.nid
   left join graded g on g.cid = c.id
+  left join exam_notes x on x.nid = t.nid
  group by t.topic
 "#,
         prefix_len = prefix.len(),

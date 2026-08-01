@@ -7,6 +7,7 @@ mod config;
 mod dbcheck;
 mod deck;
 mod deckconfig;
+mod exam_item;
 mod graves;
 mod note;
 mod notetype;
