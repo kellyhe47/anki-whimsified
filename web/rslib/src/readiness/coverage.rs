@@ -10,7 +10,10 @@
 //! match no category are reported as unmapped rather than dropped -- silently
 //! discarding them would hide both typos and gaps in the outline data.
 
+use std::collections::HashSet;
+
 use crate::prelude::*;
+use crate::readiness::data::aamc_outline::outline;
 use crate::readiness::data::aamc_outline::OutlineSection;
 use crate::readiness::evidence::TopicEvidence;
 
@@ -49,13 +52,74 @@ pub(crate) struct CoverageMap {
 }
 
 /// Measure topic evidence against the outline.
-pub(crate) fn coverage_map(_evidence: &[TopicEvidence]) -> CoverageMap {
-    todo!("ticket 005")
+///
+/// Every category of the outline comes back exactly once, so the denominator of
+/// `coverage_pct` is the whole outline no matter what the deck contains. A
+/// category is covered only when a deck topic mapped to it has at least one card
+/// with review history behind it: cards that exist but were never answered are a
+/// plan to study, not evidence of it.
+pub(crate) fn coverage_map(evidence: &[TopicEvidence]) -> CoverageMap {
+    let outline = outline();
+    let mut mapped: HashSet<&str> = HashSet::new();
+    let mut categories: Vec<CategoryCoverage> = Vec::with_capacity(outline.len());
+
+    for category in outline {
+        let matching = evidence
+            .iter()
+            .filter(|ev| category.topics.iter().any(|topic| *topic == ev.topic));
+
+        let mut cards_total: u32 = 0;
+        let mut cards_with_history: u32 = 0;
+        let mut topics: Vec<String> = Vec::new();
+        for ev in matching {
+            mapped.insert(ev.topic.as_str());
+            // counts come from the database and are only ever added together
+            // here; saturating keeps an absurd collection from panicking.
+            cards_total = cards_total.saturating_add(ev.cards_total);
+            cards_with_history = cards_with_history.saturating_add(ev.cards_with_history);
+            if !topics.iter().any(|seen| *seen == ev.topic) {
+                topics.push(ev.topic.clone());
+            }
+        }
+
+        categories.push(CategoryCoverage {
+            id: category.id,
+            name: category.name,
+            section: category.section,
+            covered: cards_with_history > 0,
+            cards_total,
+            cards_with_history,
+            topics,
+        });
+    }
+
+    // deck topics the outline has never heard of: reported, never dropped
+    let mut seen: HashSet<&str> = HashSet::new();
+    let unmapped_topics: Vec<String> = evidence
+        .iter()
+        .filter(|ev| !mapped.contains(ev.topic.as_str()))
+        .filter(|ev| seen.insert(ev.topic.as_str()))
+        .map(|ev| ev.topic.clone())
+        .collect();
+
+    let covered = categories.iter().filter(|c| c.covered).count();
+    let coverage_pct = if categories.is_empty() {
+        0.0
+    } else {
+        (covered as f32 / categories.len() as f32 * 100.0).clamp(0.0, 100.0)
+    };
+
+    CoverageMap {
+        categories,
+        unmapped_topics,
+        coverage_pct,
+    }
 }
 
 impl Collection {
     /// The coverage map for this collection's cards.
     pub(crate) fn coverage(&mut self) -> Result<CoverageMap> {
-        todo!("ticket 005")
+        let evidence = self.topic_evidence()?;
+        Ok(coverage_map(&evidence))
     }
 }
