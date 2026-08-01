@@ -90,7 +90,10 @@ fn three_scores_abstains_without_evidence() {
         ];
         for (name, score) in scores {
             let score = score.unwrap_or_else(|| panic!("{case}: missing {name} score"));
-            assert!(score.abstaining, "{case}: {name} score should be abstaining");
+            assert!(
+                score.abstaining,
+                "{case}: {name} score should be abstaining"
+            );
         }
     }
 }
