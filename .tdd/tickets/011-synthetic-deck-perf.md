@@ -1,11 +1,11 @@
 ---
 id: 011
 title: 50k synthetic deck generator and mastery-query performance assertion
-status: pending
+status: tests-written
 depends_on: [002]
 touches: [web/tools/synthetic_deck/, web/rslib/benches/]
 iterations: 0
-test_files: []
+test_files: [web/rslib/src/readiness/perf_tests.rs]
 branch: ""
 ---
 

@@ -45,6 +45,10 @@ pub enum BoolKey {
     /// Whether whimsical mnemonic cues are shown. Doubles as the ablation
     /// control for measuring whether whimsy helps, so it must default to on.
     WhimsyEnabled,
+    /// Whether the AI feature is switched on. Defaults to *off*: spec §3
+    /// requires both apps to run with AI switched off, so it is absent from the
+    /// default-true arm of `get_config_bool` on purpose.
+    AiEnabled,
     #[strum(to_string = "normalize_note_text")]
     NormalizeNoteText,
     #[strum(to_string = "dayLearnFirst")]
