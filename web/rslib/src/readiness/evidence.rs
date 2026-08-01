@@ -10,6 +10,7 @@
 
 use crate::prelude::*;
 use crate::readiness::exam_items::EXAM_ITEM_TAG;
+use crate::readiness::provenance::AI_GENERATED_TAG;
 use crate::revlog::RevlogReviewKind;
 
 /// Note tags of the form `mcat::<section>::<topic>` name a topic. Tags without
@@ -65,6 +66,14 @@ const GRADED_REVIEW_KINDS: &[RevlogReviewKind] = &[
 /// that have no recorded last review time; for every other card the answer is
 /// exact.
 ///
+/// AI-generated notes are dropped in the `topics` CTE, so they contribute no
+/// cards, no history, no reviews and no retrievability -- the evidence firewall
+/// of ticket 008, enforced here as well as in the type system. The type-level
+/// gate ([`crate::readiness::provenance::ScoringEvidenceItem`]) cannot cover
+/// this path: the aggregation never materialises a Rust value per note, so the
+/// exclusion has to happen in SQL. It stays inside this one statement -- the
+/// single-query guarantee below is load-bearing.
+///
 /// Cards of exam-item notes are excluded from the retrievability average, and
 /// from that alone. Retrievability is the memory score's evidence, and memory
 /// is DOK 1 flashcard recall: an exam item is not a flashcard, so its recall
@@ -73,6 +82,7 @@ const GRADED_REVIEW_KINDS: &[RevlogReviewKind] = &[
 fn evidence_sql() -> String {
     let prefix = TOPIC_TAG_PREFIX;
     let exam_item_tag = EXAM_ITEM_TAG;
+    let ai_generated_tag = AI_GENERATED_TAG;
     // `substr` is 1-based, so the topic name starts one past the prefix.
     let topic_starts_at = prefix.len() + 1;
     let graded_kinds = GRADED_REVIEW_KINDS
@@ -93,11 +103,17 @@ with recursive split(nid, tag, rest) as (
       from split
      where rest <> ''
 ),
+ai_notes as (
+    select distinct nid
+      from split
+     where tag = '{ai_generated_tag}'
+),
 topics as (
     select distinct nid, substr(tag, {topic_starts_at}) as topic
       from split
      where tag like '{prefix}%'
        and length(tag) > {prefix_len}
+       and nid not in (select nid from ai_notes)
 ),
 exam_notes as (
     select distinct nid

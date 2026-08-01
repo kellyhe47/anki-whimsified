@@ -1,7 +1,7 @@
 ---
 id: 008
 title: AI evidence firewall and AI-disabled scoring path
-status: tests-written
+status: green
 depends_on: [004]
 touches: [web/rslib/src/readiness/scores.rs, web/rslib/src/readiness/evidence.rs, web/rslib/src/config/]
 iterations: 0
@@ -64,3 +64,19 @@ Written by the test-writer agent.
 - `field_bears_evidence` returns true for every field except `Whimsy`, so wiring it
   in adds one rejected case rather than a general mechanism — narrower than ticket
   006's note implied.
+
+## Attempt log
+
+- iter 1: implemented. Stopped on a locked test believed wrong, rather than
+  bending the code around it — correct behaviour, and the claim was right.
+- **Locked-test defect, fixed through the test-writer channel (not charged as an
+  iteration):** `OTHER_TOPIC_CATEGORY` was `cp::4a`, which sits at outline index 9.
+  The fixture studies indices 0–19, so that category was already covered before
+  any AI card existed and the assertion "an AI-only topic made its category
+  covered" was unsatisfiable. Repointed at `ps::10a` (index 30).
+- The replacement is *stricter* than the original: section `ps` IS studied
+  (`ps::6a`, index 19), so had the firewall merely zeroed review counts and left
+  the topic row alive, sibling inference would have handed it mastery and moved
+  the Memory estimate. Passing proves AI content is excluded from evidence
+  entirely, which is what the ticket asked for.
+- Green: 664 passed, 7 skipped.

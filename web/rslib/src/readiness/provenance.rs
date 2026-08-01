@@ -3,9 +3,6 @@
 
 //! Ticket 008 -- content provenance and the evidence firewall.
 //!
-//! STUB. Every body here is `todo!()`; the tests in `ai_firewall_tests.rs`
-//! encode what they must do.
-//!
 //! The firewall exists because generated explanations must never silently
 //! become scoring evidence. It is built as a *type*, not as a runtime `if`: a
 //! [`ScoringEvidenceItem`] is the only shape the scoring pipeline accepts, its
@@ -20,6 +17,7 @@
 //! count.
 
 use crate::prelude::*;
+use crate::readiness::mnemonic::field_bears_evidence;
 
 /// Note tag marking content produced by a generative model.
 ///
@@ -50,13 +48,25 @@ impl Provenance {
     /// Whether content of this provenance may be counted towards scoring
     /// evidence at all.
     pub(crate) fn bears_evidence(self) -> bool {
-        todo!("008: AI-generated content bears no evidence")
+        match self {
+            Provenance::LearnerAuthored | Provenance::SourceDerived => true,
+            Provenance::AiGenerated => false,
+        }
     }
 }
 
 /// The provenance a note's tags claim.
 pub(crate) fn provenance_of(tags: &[String]) -> Provenance {
-    todo!("008: derive provenance from note tags")
+    // the AI marker is checked first and wins outright: a note that claims both
+    // a cited source and a generative model is still unvouched-for content, and
+    // the safe reading of an ambiguous claim is the stricter one.
+    if tags.iter().any(|tag| tag == AI_GENERATED_TAG) {
+        return Provenance::AiGenerated;
+    }
+    if tags.iter().any(|tag| tag == SOURCE_DERIVED_TAG) {
+        return Provenance::SourceDerived;
+    }
+    Provenance::LearnerAuthored
 }
 
 /// One piece of content that has passed the firewall and may be counted.
@@ -65,7 +75,6 @@ pub(crate) fn provenance_of(tags: &[String]) -> Provenance {
 /// this type is a proof that the firewall was applied. Nothing downstream needs
 /// to re-check.
 #[derive(Debug, Clone, PartialEq, Eq)]
-#[allow(dead_code)] // stub: fields are read once `from_note` is implemented
 pub(crate) struct ScoringEvidenceItem {
     note_id: NoteId,
     provenance: Provenance,
@@ -83,21 +92,32 @@ impl ScoringEvidenceItem {
         tags: &[String],
         field_name: &str,
     ) -> Result<ScoringEvidenceItem> {
-        todo!("008: reject AI provenance and non-evidence fields")
+        let provenance = provenance_of(tags);
+        if !provenance.bears_evidence() {
+            invalid_input!("{provenance:?} content may not become scoring evidence");
+        }
+        if !field_bears_evidence(field_name) {
+            invalid_input!("field {field_name:?} bears no scoring evidence");
+        }
+        Ok(ScoringEvidenceItem {
+            note_id,
+            provenance,
+            field_name: field_name.to_string(),
+        })
     }
 
     /// The note this evidence came from.
     pub(crate) fn note_id(&self) -> NoteId {
-        todo!("008")
+        self.note_id
     }
 
     /// The provenance that was accepted. Never [`Provenance::AiGenerated`].
     pub(crate) fn provenance(&self) -> Provenance {
-        todo!("008")
+        self.provenance
     }
 
     /// The note field this evidence came from.
     pub(crate) fn field_name(&self) -> &str {
-        todo!("008")
+        &self.field_name
     }
 }

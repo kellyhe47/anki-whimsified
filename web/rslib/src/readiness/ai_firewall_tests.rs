@@ -56,10 +56,17 @@ const TOPIC: &str = "bb::amino_acids";
 /// The outline category `TOPIC` maps to.
 const TOPIC_CATEGORY: &str = "bb::1a";
 
-/// A second topic, in another section, for isolation tests.
-const OTHER_TOPIC_TAG: &str = "mcat::cp::kinematics";
-const OTHER_TOPIC: &str = "cp::kinematics";
-const OTHER_TOPIC_CATEGORY: &str = "cp::4a";
+/// A second topic, for isolation tests, chosen so the learner genuinely has not
+/// studied it: `well_evidenced_collection` studies outline indices 0..20, which
+/// end at `ps::6a`, and `ps::10a` sits at index 30. A topic inside the studied
+/// range would already be `covered` before any AI card was added, which would
+/// make the "an AI-only topic is not covered" assertion below unsatisfiable for
+/// any correct implementation -- `coverage_tests.rs` fixes `covered` as
+/// `cards_with_history > 0`, and a learner card with twelve reviews must make
+/// its category covered.
+const OTHER_TOPIC_TAG: &str = "mcat::ps::social_inequality";
+const OTHER_TOPIC: &str = "ps::social_inequality";
+const OTHER_TOPIC_CATEGORY: &str = "ps::10a";
 
 /// A fixed clock, so recorded timestamps are a function of the input.
 const NOW: TimestampSecs = TimestampSecs(1_700_000_000);
@@ -586,7 +593,11 @@ fn ai_firewall_reviewing_an_ai_card_does_not_move_the_scores() {
     let mut col = well_evidenced_collection();
     let before = three_score_shapes(&mut col);
 
-    // a generated card in a section the learner has not studied, drilled hard
+    // A generated card, drilled hard, in an outline category the learner has
+    // never touched. Its *section* has been studied, so a topic row surviving
+    // here would also pick up a sibling-inferred mastery and move Memory -- the
+    // firewall has to keep it out of the evidence entirely, not merely zero its
+    // review count.
     let generated = add_tagged_note(
         &mut col,
         "generated explanation",
