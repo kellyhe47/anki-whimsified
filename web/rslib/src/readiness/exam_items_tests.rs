@@ -301,7 +301,8 @@ fn an_empty_typed_answer_is_never_correct() {
 // per-topic counts
 // -------------------------------------------------------------------------
 
-/// Answered exam items are counted per topic, with the correct ones as a subset.
+/// Answered exam items are counted per topic, with the correct ones as a
+/// subset.
 #[test]
 fn exam_item_counts_are_reported_per_topic() {
     let mut col = Collection::new();

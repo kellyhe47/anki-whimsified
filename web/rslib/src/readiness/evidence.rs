@@ -66,10 +66,10 @@ const GRADED_REVIEW_KINDS: &[RevlogReviewKind] = &[
 /// exact.
 ///
 /// Cards of exam-item notes are excluded from the retrievability average, and
-/// from that alone. Retrievability is the memory score's evidence, and memory is
-/// DOK 1 flashcard recall: an exam item is not a flashcard, so its recall must
-/// not move that average. Its *reviews* still count -- the give-up rule spans
-/// every graded review in the collection, exam item or not.
+/// from that alone. Retrievability is the memory score's evidence, and memory
+/// is DOK 1 flashcard recall: an exam item is not a flashcard, so its recall
+/// must not move that average. Its *reviews* still count -- the give-up rule
+/// spans every graded review in the collection, exam item or not.
 fn evidence_sql() -> String {
     let prefix = TOPIC_TAG_PREFIX;
     let exam_item_tag = EXAM_ITEM_TAG;

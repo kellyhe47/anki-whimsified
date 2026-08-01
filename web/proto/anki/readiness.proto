@@ -10,6 +10,7 @@ package anki.readiness;
 service ReadinessService {
   rpc TopicMastery(TopicMasteryRequest) returns (TopicMasteryResponse);
   rpc ThreeScores(ThreeScoresRequest) returns (ThreeScoresResponse);
+  rpc CoverageMap(CoverageMapRequest) returns (CoverageMapResponse);
 }
 
 // Implicitly includes any of the above methods that are not listed in the
@@ -64,4 +65,35 @@ message ThreeScoresResponse {
   Score memory = 1;
   Score performance = 2;
   Score readiness = 3;
+}
+
+// One category of the AAMC content outline, and what the deck has to say about
+// it. Every category is reported whether the deck reaches it or not: a category
+// the deck ignores is the most useful thing the map can tell a learner, so it
+// is named rather than merely counted.
+message CategoryCoverage {
+  // The category's stable id from the outline data, eg `bb::1a`.
+  string id = 1;
+  // The category's name as the AAMC writes it.
+  string name = 2;
+  // The exam section the category belongs to, as a display label.
+  string section = 3;
+  // True only when at least one card in this category has been studied.
+  bool covered = 4;
+  uint32 cards_total = 5;
+  uint32 cards_with_history = 6;
+  // The deck topics that mapped to this category.
+  repeated string topics = 7;
+}
+
+message CoverageMapRequest {}
+
+message CoverageMapResponse {
+  // Every outline category, covered or not.
+  repeated CategoryCoverage categories = 1;
+  // Deck topics that matched no outline category, named individually rather
+  // than dropped.
+  repeated string unmapped_topics = 2;
+  // Covered categories over total categories, in [0.0, 100.0].
+  float coverage_pct = 3;
 }

@@ -36,6 +36,18 @@ impl OutlineSection {
         OutlineSection::PsychSoc,
         OutlineSection::Cars,
     ];
+
+    /// The section's name, for showing to a learner. These are the AAMC's own
+    /// section names, abbreviated only where the full title would not fit a
+    /// table row; nothing here is invented.
+    pub(crate) fn label(self) -> &'static str {
+        match self {
+            OutlineSection::BioBiochem => "Biological and Biochemical Foundations",
+            OutlineSection::ChemPhys => "Chemical and Physical Foundations",
+            OutlineSection::PsychSoc => "Psychological, Social, and Biological Foundations",
+            OutlineSection::Cars => "Critical Analysis and Reasoning Skills",
+        }
+    }
 }
 
 /// One content category of the outline.
@@ -69,8 +81,8 @@ const fn category(
 }
 
 /// The published outline: 31 content categories across the three science
-/// sections, plus the three CARS skills. Nothing here is invented -- the ids and
-/// names are the AAMC's own.
+/// sections, plus the three CARS skills. Nothing here is invented -- the ids
+/// and names are the AAMC's own.
 ///
 /// The `topics` of each category are deck-side keys, not AAMC data: the
 /// section-qualified category key (`bb::1a`, matching the

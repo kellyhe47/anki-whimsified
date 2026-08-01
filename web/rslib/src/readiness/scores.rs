@@ -79,21 +79,22 @@ const READINESS_PERFORMANCE_WEIGHT: f32 = 0.7;
 const READINESS_COVERAGE_WEIGHT: f32 = 1.0 - READINESS_PERFORMANCE_WEIGHT;
 
 /// Half-width, in percentage points, of a percentage-scale range backed by a
-/// single unit of evidence. Divided by the square root of the evidence count, so
-/// the range narrows as evidence accumulates and never quite reaches zero.
+/// single unit of evidence. Divided by the square root of the evidence count,
+/// so the range narrows as evidence accumulates and never quite reaches zero.
 const PERCENT_RANGE_HALF_WIDTH_AT_ONE: f32 = 50.0;
 
 /// As above, for readiness, as a fraction of the MCAT scale span. Readiness
 /// reads two independent pools of evidence -- graded reviews and answered exam
-/// items -- and is no more certain than the thinner of them, so both contribute.
+/// items -- and is no more certain than the thinner of them, so both
+/// contribute.
 const READINESS_RANGE_HALF_WIDTH_AT_ONE: f32 = 0.25;
 
 /// No reported range is ever narrower than this, on either scale. A range of
 /// zero width would claim a precision no amount of study earns.
 const MIN_RANGE_HALF_WIDTH: f32 = 0.1;
 
-/// How far inside the MCAT scale a readiness estimate is kept, so that its range
-/// always has somewhere to go in both directions.
+/// How far inside the MCAT scale a readiness estimate is kept, so that its
+/// range always has somewhere to go in both directions.
 const MCAT_SCALE_EDGE_MARGIN: f32 = 0.5;
 
 /// Named in `missing_evidence` when there are too few graded reviews.
@@ -346,9 +347,9 @@ fn exam_item_accuracy(answered: u32, correct: u32) -> f32 {
 /// Abstains, listing every applicable reason, when any of the give-up
 /// conditions holds: too few graded reviews, too little coverage, or no topic
 /// with a usable mastery figure. It also abstains when performance itself
-/// abstains -- readiness is built on performance, and a readiness number with no
-/// performance measurement under it would be exactly the invented figure this
-/// module exists to prevent.
+/// abstains -- readiness is built on performance, and a readiness number with
+/// no performance measurement under it would be exactly the invented figure
+/// this module exists to prevent.
 fn readiness_score(
     graded_reviews: u32,
     masteries: &[f32],

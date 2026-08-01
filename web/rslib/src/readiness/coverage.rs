@@ -55,9 +55,9 @@ pub(crate) struct CoverageMap {
 ///
 /// Every category of the outline comes back exactly once, so the denominator of
 /// `coverage_pct` is the whole outline no matter what the deck contains. A
-/// category is covered only when a deck topic mapped to it has at least one card
-/// with review history behind it: cards that exist but were never answered are a
-/// plan to study, not evidence of it.
+/// category is covered only when a deck topic mapped to it has at least one
+/// card with review history behind it: cards that exist but were never answered
+/// are a plan to study, not evidence of it.
 pub(crate) fn coverage_map(evidence: &[TopicEvidence]) -> CoverageMap {
     let outline = outline();
     let mut mapped: HashSet<&str> = HashSet::new();

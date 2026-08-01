@@ -14,5 +14,4 @@ CREATE TABLE IF NOT EXISTS exam_item_answers (
   -- button the learner pressed
   matched integer NOT NULL
 );
-
 CREATE INDEX IF NOT EXISTS ix_exam_item_answers_cid ON exam_item_answers (cid);

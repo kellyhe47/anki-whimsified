@@ -42,8 +42,8 @@ pub(crate) struct ExamItemAnswer {
 /// Per-topic exam-item counts, for the performance score.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub(crate) struct TopicExamItems {
-    /// The topic, in the same form [`crate::readiness::evidence::TopicEvidence`]
-    /// uses.
+    /// The topic, in the same form
+    /// [`crate::readiness::evidence::TopicEvidence`] uses.
     pub topic: String,
     /// How many exam items in this topic have been answered.
     pub exam_items_answered: u32,

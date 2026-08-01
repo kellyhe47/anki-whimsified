@@ -16,9 +16,9 @@
 //! * [`State::Inferred`] -- either some direct evidence but less than the
 //!   threshold, or no direct evidence at all with at least one studied sibling
 //!   in the same section. Both are indirect signals, so both are inferences.
-//! * [`State::Unknown`] -- no direct evidence *and* no studied sibling to
-//!   infer from. Mastery is `None`, never `Some(0.0)`: absent is not the same
-//!   claim as zero.
+//! * [`State::Unknown`] -- no direct evidence *and* no studied sibling to infer
+//!   from. Mastery is `None`, never `Some(0.0)`: absent is not the same claim
+//!   as zero.
 
 use anki_proto::readiness::topic_mastery::State;
 

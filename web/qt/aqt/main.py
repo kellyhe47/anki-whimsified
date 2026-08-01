@@ -1360,6 +1360,9 @@ title="{}" {}>{}</button>""".format(
 
         aqt.models.Models(self, self, fromMain=True)
 
+    def on_exam_readiness(self) -> None:
+        aqt.dialogs.open("ExamReadiness", self)
+
     def onAbout(self) -> None:
         aqt.dialogs.open("About", self)
 
@@ -1471,6 +1474,13 @@ title="{}" {}>{}</button>""".format(
         qconnect(m.actionNoteTypes.triggered, self.onNoteTypes)
         qconnect(m.action_check_for_updates.triggered, self.on_check_for_updates)
         qconnect(m.actionPreferences.triggered, self.onPrefs)
+
+        # Tools > Exam Readiness. Added here rather than in main.ui so the
+        # window can be reached without regenerating the Qt forms.
+        self.action_exam_readiness = QAction("Exam Readiness...", self)
+        m.menuTools.addSeparator()
+        m.menuTools.addAction(self.action_exam_readiness)
+        qconnect(self.action_exam_readiness.triggered, self.on_exam_readiness)
 
         # View
         qconnect(

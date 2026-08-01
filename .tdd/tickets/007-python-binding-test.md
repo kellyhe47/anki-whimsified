@@ -1,11 +1,11 @@
 ---
 id: 007
 title: Python binding test through the real FFI
-status: pending
+status: green
 depends_on: [004]
 touches: [web/pylib/tests/test_readiness.py]
 iterations: 0
-test_files: []
+test_files: [web/pylib/tests/test_readiness.py]
 branch: ""
 ---
 

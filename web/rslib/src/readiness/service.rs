@@ -2,6 +2,9 @@
 // License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
 use std::collections::HashSet;
 
+use anki_proto::readiness::CategoryCoverage;
+use anki_proto::readiness::CoverageMapRequest;
+use anki_proto::readiness::CoverageMapResponse;
 use anki_proto::readiness::ThreeScoresRequest;
 use anki_proto::readiness::ThreeScoresResponse;
 use anki_proto::readiness::TopicMastery;
@@ -84,5 +87,33 @@ impl crate::services::ReadinessService for Collection {
             &coverage,
             TimestampSecs::now(),
         ))
+    }
+
+    /// The deck measured against the whole AAMC outline.
+    ///
+    /// Every outline category comes back, covered or not, so a reader can see
+    /// the denominator behind `coverage_pct` rather than being asked to trust
+    /// it. Deck topics the outline has never heard of are named too.
+    fn coverage_map(&mut self, _input: CoverageMapRequest) -> error::Result<CoverageMapResponse> {
+        let evidence = self.topic_evidence()?;
+        let coverage = coverage_map(&evidence);
+
+        Ok(CoverageMapResponse {
+            categories: coverage
+                .categories
+                .iter()
+                .map(|category| CategoryCoverage {
+                    id: category.id.to_string(),
+                    name: category.name.to_string(),
+                    section: category.section.label().to_string(),
+                    covered: category.covered,
+                    cards_total: category.cards_total,
+                    cards_with_history: category.cards_with_history,
+                    topics: category.topics.clone(),
+                })
+                .collect(),
+            unmapped_topics: coverage.unmapped_topics.clone(),
+            coverage_pct: coverage.coverage_pct,
+        })
     }
 }
