@@ -25,8 +25,8 @@ Nothing here is an assertion without evidence.
 | Two-way sync demonstrated live | ✅ | Self-hosted `anki-sync-server`; desktop uploaded, AnkiDroid pulled down, phone went from empty to "6 cards due". `proof/sync.txt`, `proof/android-synced-deck.png` |
 | Sync idempotency: replay, duplication, ordering, offline | ✅ 7 automated tests | `web/rslib/src/sync/collection/idempotency_tests.rs` |
 | **No lost or double counted reviews** | ⚠️ **DEFECT FOUND — see below** | `same_millisecond_reviews_on_two_clients_must_both_be_recorded` |
-| AI traced to source, held-out eval, beats baselines | ❌ **NOT BUILT** | See "Deliberately not built" |
-| App scores with AI off | ✅ trivially | No AI code path exists; scoring is entirely local and deterministic |
+| AI traced to source, held-out eval, beats baselines | ✅ **PASS** | Held-out recall@1: BM25 64.52%, neural vector 69.35%, AI-assisted **87.10%**. Cutoff of +5 pts committed in `f6dc5ab64` before any implementation. `data/openstax/RESULTS.md` |
+| App scores with AI off | ✅ | `ai_enabled` defaults **off**; AI-tagged content is excluded inside the evidence CTE and by a type-level gate. Ticket 008. |
 | Proof: commit hash, tests, artifacts | ✅ | This document |
 
 ---
