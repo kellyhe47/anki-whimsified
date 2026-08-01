@@ -16,9 +16,36 @@ Rust engine — see [Shared engine](#shared-engine).
 
 ---
 
-## The one rule this codebase is built around
+## The bet
+
+> **Concept-relevant whimsy is a memory technology.** When a playful association
+> accurately maps to an abstract scientific relationship, remembering the whimsy
+> retrieves the concept — and the benefit survives having the whimsy taken away.
+
+Consensus says serious MCAT instruction should be plain and whimsy belongs in
+branding. The counter-evidence is real and load-bearing: Harp & Mayer (1998) show
+that interesting but *irrelevant* detail reduces recall and transfer. So "fun" is
+not the treatment. **Accurate mapping is**, and decorative whimsy is the control.
+
+Every cue in this deck ships with an explicit `ConceptMap` field naming what maps
+to what. A cue whose elements do not map is decoration, and decoration is the
+control condition. Cues appear while teaching and **disappear during testing** —
+`whimsyEnabled` is not a preference, it is the ablation switch the thesis test
+runs on ([`mnemonic.rs`](web/rslib/src/readiness/mnemonic.rs)).
+
+### Why the bet forces an honesty rule
+
+A memory claim is only worth making if it can be proven wrong. If the app's own
+scores can drift upward on card volume, "whimsy helped" is unfalsifiable — the
+number would rise whether or not the mnemonic did anything. So the thesis requires
+measurement that refuses to inflate:
 
 > A readiness score is never shown unless the evidence behind it exists.
+
+That rule is the precondition for testing the bet, not a separate product. Memory
+and Performance are kept structurally separate for the same reason: a mnemonic can
+succeed at DOK 1 recall and still fail at DOK 2–3 transfer, and the system has to
+be able to *report that failure* rather than blend it away.
 
 Three scores are reported **separately and never blended**:
 
