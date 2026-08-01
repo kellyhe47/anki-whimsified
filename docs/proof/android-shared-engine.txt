@@ -1,0 +1,26 @@
+# Shared engine: AnkiDroid running on this fork's Rust backend
+
+Captured: Fri Jul 31 22:54:15 CDT 2026
+
+## Chain of evidence
+1. rsdroid consumes anki via path dep: anki = { path = "../anki/rslib" }, symlinked to this fork
+2. cargo check -p rsdroid: clean against our rslib (no API skew)
+3. librsdroid.so (aarch64-linux-android) contains anki::readiness::* symbols
+4. AnkiDroid consumes it via its own local_backend=true switch - no gradle edits
+5. APK contains lib/arm64-v8a/librsdroid.so with our readiness strings
+6. App installs and runs: no UnsatisfiedLinkError, no FATAL
+
+## APK contents
+ 41697856  01-01-1981 01:01   lib/arm64-v8a/librsdroid.so
+
+## Readiness strings inside the shipped .so
+coverage shortfall
+graded-review shortfall
+whimsyEnabled
+
+## Running process
+5408
+
+## Version skew encountered (total)
+One line: Deck.kt lacked a RELATIVE_OVERDUENESS branch, an enum variant
+this fork's backend adds. Fixed using the existing decks-relative-overdueness ftl string.

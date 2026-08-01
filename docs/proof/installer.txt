@@ -1,0 +1,395 @@
+================================================================================
+macOS DESKTOP INSTALLER — BUILD AND CLEAN-ENVIRONMENT VERIFICATION
+================================================================================
+Recorded: 2026-07-31, ~23:00–23:25 local.
+Supersedes the earlier version of this file, which recorded the artifact as
+built but never launched outside the checkout. The clean-environment launch has
+now been run. What it does and does not prove is spelled out in section 7.
+
+--------------------------------------------------------------------------------
+0. MACHINE / ENVIRONMENT
+--------------------------------------------------------------------------------
+$ sw_vers
+ProductName:            macOS
+ProductVersion:         26.4
+BuildVersion:           25E246
+
+$ uname -a
+Darwin Kellys-MacBook-Pro.local 25.4.0 Darwin Kernel Version 25.4.0:
+Thu Mar 19 19:33:43 PDT 2026; root:xnu-12377.101.15~1/RELEASE_ARM64_T8142 arm64
+
+Architecture: arm64 (Apple silicon)
+just version: 1.57.0
+
+Build shell environment (as required):
+export PATH="/opt/homebrew/opt/rustup/bin:$PATH:/Users/kellyhe/Documents/gauntlet/superbuilder/anki-whimsified/web/out/bin"
+
+Working directory for the build:
+/Users/kellyhe/Documents/gauntlet/superbuilder/anki-whimsified/web
+
+--------------------------------------------------------------------------------
+1. FINDING THE RECIPE  (honest note: none existed)
+--------------------------------------------------------------------------------
+`just --list` and `web/release.just` were both checked.
+
+  - `just --list` has NO installer recipe. Its recipes are: build, check, ci,
+    clean, complexipy-diff, coverage, default, docs, docs-rust, docs-serve,
+    fix-fmt, fix-lint, fix-minilints, fmt, ftl-deprecate, ftl-sync, lint,
+    minilints, rebuild-web, run, run-optimized, test, test-e2e, test-py,
+    test-rust, test-ts, web-watch, wheels, release...
+  - `web/release.just` (the `release` module) only dispatches GitHub Actions
+    workflows via `gh workflow run`. It builds nothing locally.
+
+The installer is wired into the ninja graph in
+web/build/configure/src/installer.rs as the targets:
+    installer:template:mac   (git submodule sync of qt/installer/mac-template)
+    installer:build          (briefcase build)
+    installer:package        (briefcase package -> .dmg)
+driven by web/qt/tools/build_installer.py.
+
+web/CLAUDE.md forbids invoking ./ninja directly and says every command must be
+a `just` recipe. Since no recipe existed, ONE FILE WAS MODIFIED — web/justfile —
+to add the two missing thin wrappers (nothing else in the repo was changed by
+the build or verification work):
+
+    # Build the desktop app bundle with Briefcase (no packaging step)
+    installer-build:
+        {{ ninja }} installer:build
+
+    # Build and package the platform desktop installer with Briefcase
+    installer:
+        {{ ninja }} installer:package
+
+--------------------------------------------------------------------------------
+2. THE BUILD
+--------------------------------------------------------------------------------
+$ export PATH="/opt/homebrew/opt/rustup/bin:$PATH:/Users/kellyhe/Documents/gauntlet/superbuilder/anki-whimsified/web/out/bin"
+$ cd /Users/kellyhe/Documents/gauntlet/superbuilder/anki-whimsified/web
+$ just installer
+
+Outcome: SUCCESS, exit code 0, 108.64 s.
+
+Tail of output, verbatim:
+
+    [anki] Ad-hoc signing app...
+    [anki] Built build/anki/macos/app/Anki.app
+    Log saved to .../web/out/installer/logs/briefcase.2026_07_31-23_01_36.build.log
+    [6/7; 1 active; 108.637s] installer:package
+    [anki] Signing app...
+    ****************************************************************************
+    **              WARNING: Signing with an ad-hoc identity                   **
+    ****************************************************************************
+      This app is being signed with an ad-hoc identity. The resulting app will
+      run on this computer, but will not run on anyone else's computer.
+      To generate an app that can be distributed to others, you must obtain an
+      application distribution certificate from Apple, and select the developer
+      identity associated with that certificate when running 'briefcase package'.
+    ****************************************************************************
+    Signing app with ad-hoc identity...
+    [anki] Building DMG...
+    Building Anki-26.5.dmg... started
+    Building Anki-26.5.dmg... done
+    [anki] Packaged dist/Anki-26.5.dmg
+    Log saved to .../web/out/installer/logs/briefcase.2026_07_31-23_02_24.package.log
+    Build succeeded in 108.64s.
+
+Full Briefcase logs kept at:
+  web/out/installer/logs/briefcase.2026_07_31-23_01_36.build.log
+  web/out/installer/logs/briefcase.2026_07_31-23_02_24.package.log
+
+--------------------------------------------------------------------------------
+3. ARTIFACT
+--------------------------------------------------------------------------------
+Path:   /Users/kellyhe/Documents/gauntlet/superbuilder/anki-whimsified/web/out/installer/dist/anki-26.05-mac-apple.dmg
+Size:   227,477,965 bytes (224 MiB / 227 MB)
+Type:   $ file  ->  "bzip2 compressed data, block size = 100k"
+        i.e. a bzip2-compressed Apple disk image; hdiutil verifies and mounts it
+        as GUID_partition_scheme / Apple_HFS, volume name "Anki 26.5".
+SHA256: d7cbca9b1def4411dc11b17258bf50defc894f651f413186bacbed20c3e41d45
+Version: Anki 26.05  (.version = 26.05; bundles wheels anki-26.5, aqt-26.5)
+Contents: /Volumes/Anki 26.5/Anki.app (669 MB expanded) + symlink to /Applications
+
+Code signature of the app inside:
+$ codesign -dv --verbose=2 /Applications/Anki.app
+  Identifier=net.ankiweb.anki
+  Format=app bundle with Mach-O thin (arm64)
+  CodeDirectory v=20400 flags=0x2(adhoc)
+  Signature=adhoc
+  TeamIdentifier=not set
+  Sealed Resources version=2 rules=13 files=4617
+
+$ spctl -a -vv /Applications/Anki.app
+  /Applications/Anki.app: rejected
+
+--------------------------------------------------------------------------------
+4. INSTALL
+--------------------------------------------------------------------------------
+$ hdiutil attach -nobrowse -readonly .../dist/anki-26.05-mac-apple.dmg
+  (every CRC32 checksum verified)
+  /dev/disk9s1  Apple_HFS  /Volumes/Anki 26.5
+$ cp -R "/Volumes/Anki 26.5/Anki.app" /Applications/Anki.app
+$ hdiutil detach "/Volumes/Anki 26.5"
+  "disk9" ejected.
+
+Static check for build-tree leakage inside the installed bundle:
+$ grep -rl "anki-whimsified" /Applications/Anki.app
+  Contents/Resources/app_packages/_aqt/data/web/css/editor.css
+  Contents/Resources/app_packages/_aqt/data/web/pages/congrats.css
+  Contents/Resources/app_packages/aqt-26.5.dist-info/direct_url.json
+  Contents/Resources/app_packages/anki-26.5.dist-info/direct_url.json
+All four are inert provenance strings, not runtime paths:
+  - the two direct_url.json files record the local wheel pip installed from
+  - the two CSS hits are esbuild comments, "/* fakecss:/…/ts/lib/components/… */"
+No Mach-O in the bundle links outside the bundle plus system frameworks:
+otool -L on Contents/MacOS/Anki shows only /System, /usr/lib and
+@rpath/Python.framework.
+
+--------------------------------------------------------------------------------
+5. CLEAN-ENVIRONMENT VERIFICATION
+--------------------------------------------------------------------------------
+Two isolation methods were used. Both scrub PATH to /usr/bin:/bin:/usr/sbin:/sbin
+and start the app under `env -i`, so nothing from the build shell is inherited.
+
+  METHOD A (run once, 23:04) — Kelly's stated method. The source checkout was
+  physically renamed for the duration of the launch and renamed back after:
+    /Users/kellyhe/Documents/gauntlet/superbuilder/anki-whimsified
+      ->  .../anki-whimsified.MOVED-FOR-CLEAN-TEST
+  This method caused an incident; see section 8. Do not repeat it.
+
+  METHOD B (all later runs, non-destructive) — the checkout stays in place but is
+  made unreachable to the app process by a seatbelt profile:
+    (version 1)
+    (allow default)
+    (deny file-read* file-write*
+       (subpath "/Users/kellyhe/Documents/gauntlet/superbuilder/anki-whimsified"))
+  applied with /usr/bin/sandbox-exec -f no-repo.sb. This is the procedure to
+  repeat.
+
+--- 5a. Environment actually seen by the app (Method B) ---
+$ /usr/bin/sandbox-exec -f no-repo.sb /usr/bin/env -i HOME="$HOME" \
+    PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash -c '...'
+  PATH          = /usr/bin:/bin:/usr/sbin:/sbin
+  cargo    -> NONE
+  rustup   -> NONE
+  brew     -> NONE
+  pyenv    -> NONE
+  node     -> NONE
+  uv       -> NONE
+  just     -> NONE
+  ninja    -> NONE
+  python3  -> /usr/bin/python3      (Apple's system stub, present on a factory
+                                     -fresh Mac too, so not a toolchain leak)
+  source checkout readable? NO (EPERM)
+
+Method A printed the same tool list, plus: original repo path exists? no
+
+--- 5b. Launch of the installed app ---
+$ /usr/bin/sandbox-exec -f no-repo.sb /usr/bin/env -i \
+    HOME="$HOME" PATH=/usr/bin:/bin:/usr/sbin:/sbin ANKI_BASE=<temp dir> \
+    /Applications/Anki.app/Contents/MacOS/Anki
+
+App stdout/stderr, verbatim:
+    2026-07-31 23:21:11.273 Anki[33339] No Python NSLog handler found. ...
+    Starting Anki 26.05...
+    Qt info: OpenType support missing for ".AppleSystemUIFont", script 15
+    2026-07-31 23:21:17,165:INFO:aqt.mediasrv: Serving on http://127.0.0.1:58680
+    Qt info: OpenType support missing for ".AppleSystemUIFont", script 15
+
+Collection-open probe against the app's own HTTP endpoint. /_anki/readyz returns
+503 until the profile's collection is open and 200 once it is, so a 200 is proof
+the app got past Qt startup into a working collection:
+    attempt 1:  HTTP=503
+    attempt 2:  HTTP=200          <-- collection open
+
+Process state: RUNNING, RSS 285,504 KB.
+Open files under the source checkout: 0  (lsof, both methods).
+A fresh profile and collection were created by the run:
+    <base>/prefs21.db, <base>/User 1/collection.anki2 (+ -wal), addons21/, logs/
+
+Method A's earlier run of the same binary reached the same point and additionally
+logged "Starting main loop...", staying alive 65 s at 124 MB RSS before being
+told to quit.
+
+CONCLUSION FOR 5: the installed .app starts, initialises Qt, starts its media
+server, and opens a real collection with no Homebrew, no rustup/cargo, no pyenv
+and no node/uv/just/ninja on PATH, and with the source checkout unreadable.
+
+--------------------------------------------------------------------------------
+6. EXAM READINESS FEATURE — WHAT WAS AND WAS NOT VERIFIED
+--------------------------------------------------------------------------------
+Menu wiring in source (qt/aqt/main.py:1478-1483):
+    # Tools > Exam Readiness. ...
+    self.action_exam_readiness = QAction("Exam Readiness...", self)
+    m.menuTools.addAction(self.action_exam_readiness)
+    qconnect(self.action_exam_readiness.triggered, self.on_exam_readiness)
+    def on_exam_readiness(self): aqt.dialogs.open("ExamReadiness", self)
+
+*** NOT VERIFIED: nobody clicked Tools -> Exam Readiness... ***
+GUI automation was attempted and FAILED for permission reasons, not code reasons:
+
+    $ osascript -e 'tell application "System Events" to tell process "Anki" to
+        get name of every menu item of menu 1 of menu bar item "Tools" of menu bar 1'
+      execution error: System Events got an error:
+      osascript is not allowed assistive access. (-1719)
+
+    $ osascript -e '... click menu item "Exam Readiness..." of menu 1 of
+        menu bar item "Tools" of menu bar 1'
+      execution error: System Events got an error:
+      osascript is not allowed assistive access. (-1719)
+
+    $ screencapture -x clean-launch.png
+      could not create image from display        (Screen Recording not granted)
+
+Granting Accessibility or Screen Recording is a system-settings change and was
+not made. There is therefore NO screenshot and NO menu-click evidence in this
+record. The claim "Tools -> Exam Readiness opens" is NOT established here.
+
+WHAT WAS ESTABLISHED, by running code out of the installed bundle:
+
+A copy of the installed bundle (AnkiProbe.app — a clonefile copy of
+/Applications/Anki.app with Info.plist MainModule repointed at a small probe
+module; the shipped artifact itself was NOT modified) was executed under the same
+scrubbed PATH and the same repo-denied sandbox:
+
+    PROBE: PATH = /usr/bin:/bin:/usr/sbin:/sbin
+    PROBE: source checkout UNREADABLE: PermissionError 1
+    PROBE: aqt file                 = <bundle>/app_packages/aqt/__init__.pyc
+    PROBE: aqt.readiness file       = <bundle>/app_packages/aqt/readiness.pyc
+    PROBE: ExamReadiness registered = <class 'aqt.readiness.ReadinessDialog'>
+    PROBE: is ReadinessDialog       = True
+    PROBE: opened fresh collection
+    PROBE: three_scores() OK
+    PROBE:   readiness.abstaining         = True
+    PROBE:   readiness.missing_evidence   = ['graded-review shortfall',
+             'coverage shortfall', 'no topic has a usable mastery figure',
+             'answered exam-item shortfall']
+    PROBE:   performance.abstaining       = True
+    PROBE:   performance.missing_evidence = ['answered exam-item shortfall']
+    PROBE: coverage_map() OK -> CoverageMapResponse
+    PROBE: topic_mastery() OK, topics = 0
+    PROBE: RESULT=PASS
+
+That is: the readiness Qt dialog class ships in the bundle and is the registered
+handler for the "ExamReadiness" dialog that the Tools menu item opens; and the
+readiness Rust backend ships in the bundle, runs there, and correctly abstains on
+an empty collection instead of inventing a number. Files present:
+  /Applications/Anki.app/Contents/Resources/app_packages/aqt/readiness.pyc  (34,812 B)
+  /Applications/Anki.app/Contents/Resources/app_packages/anki/readiness_pb2.pyc
+
+A further attempt to construct the real ReadinessDialog headlessly
+(QT_QPA_PLATFORM=offscreen, aqt._run(exec=False), then mw.on_exam_readiness() and
+QWidget.grab() to a PNG) HUNG: the app reached its main window but the collection
+never became visible to the probe's timer, most likely a modal dialog blocking an
+offscreen event loop. It was killed after ~4 minutes and produced no screenshot.
+Recorded as a failed attempt, not a pass.
+
+Remaining gap, and how to close it in about a minute by hand:
+    open /Applications/Anki.app        # or launch it from a scrubbed shell
+    Tools -> Exam Readiness...         # confirm the window titled "Exam
+                                       # Readiness" opens and the three scores
+                                       # render (they will abstain on an empty
+                                       # collection, which is correct)
+
+--------------------------------------------------------------------------------
+7. WHAT THIS PROVES AND WHAT IT DOES NOT
+--------------------------------------------------------------------------------
+PROVES
+  - The installer builds from this tree in ~109 s via `just installer`.
+  - The .dmg mounts, verifies its checksums, and installs by drag-copy.
+  - The installed app runs with the developer toolchain off PATH and the source
+    checkout unreachable: it does not shell out to cargo/brew/pyenv/node and
+    opens no file under the checkout (lsof: 0 matches).
+  - It reaches an open collection (readyz HTTP 200), not merely a process that
+    has not crashed yet.
+  - The exam-readiness dialog class and its Rust backend are inside the bundle
+    and execute correctly there.
+
+DOES NOT PROVE
+  - THIS IS NOT A FRESH MACHINE. It is the build machine with PATH scrubbed and
+    one directory denied. Anything the app might still pick up from elsewhere on
+    this Mac — /usr/local, /opt/homebrew reached by absolute path, Qt or Python
+    caches under ~/Library, or system frameworks that a different clean macOS
+    install might lack — remains available and would not be caught. Only a real
+    fresh device or a clean VM closes that gap.
+  - GATEKEEPER. The app is AD-HOC SIGNED and NOT NOTARIZED. Briefcase said so
+    explicitly ("will not run on anyone else's computer") and `spctl -a -vv`
+    returns "rejected". A user who downloads this .dmg on another Mac will be
+    blocked by Gatekeeper and will need right-click -> Open or to clear the
+    com.apple.quarantine attribute. The launches recorded here bypassed that
+    entirely by running the binary from a shell. Real distribution needs a
+    Developer ID identity (SIGN_IDENTITY env var, consumed by
+    qt/tools/build_installer.py get_signing_args()) plus notarization.
+  - Nobody clicked Tools -> Exam Readiness. See section 6.
+  - Only macOS arm64 was built. Windows and Linux installers were not.
+
+--------------------------------------------------------------------------------
+8. INCIDENT DURING TESTING (disclosed in full)
+--------------------------------------------------------------------------------
+Method A — renaming the checkout out from under the filesystem — is unsafe on
+this machine because other work was running concurrently. During the second
+Method A run at ~23:08, a concurrent Gradle build for Anki-Android recreated
+.../anki-whimsified/Anki-Android/ while the real tree was renamed away, so the
+restore step moved the real repo INSIDE that recreated directory, leaving
+.../anki-whimsified/anki-whimsified/.
+
+Detected immediately and fully repaired:
+  $ mv .../anki-whimsified .../anki-whimsified.WRAPPER
+  $ mv .../anki-whimsified.WRAPPER/anki-whimsified .../anki-whimsified
+  $ mv .../anki-whimsified.WRAPPER/Anki-Android <scratch>/orphaned-gradle-output-Anki-Android
+  $ rmdir .../anki-whimsified.WRAPPER
+
+Post-repair verification:
+  $ git status --short
+     M Anki-Android/AnkiDroid/src/main/java/com/ichi2/anki/DeckPicker.kt
+     M Anki-Android/AnkiDroid/src/main/res/menu/deck_picker.xml
+     M Anki-Android/AnkiDroid/src/main/res/values/12-dont-translate.xml
+     M web/justfile
+    ?? Anki-Android/AnkiDroid/src/main/java/com/ichi2/anki/readiness/
+    ?? Anki-Android/AnkiDroid/src/main/res/drawable/readiness_card_background.xml
+    ?? Anki-Android/AnkiDroid/src/main/res/layout/fragment_readiness.xml
+  $ git submodule status   -> all four submodules present at their pinned commits
+  web/rslib/src/readiness/ intact (16 files).
+No source was lost. The only unexpected entry in git status is web/justfile,
+which is section 1's deliberate change.
+
+The orphaned directory held only Gradle BUILD OUTPUT (454 files, all under
+build/ and .gradle/, no sources). It was deliberately NOT merged back — merging
+half-written Gradle caches risks corrupting a live build — and is parked at
+  <scratch>/orphaned-gradle-output-Anki-Android
+The Android tree has its own pre-existing build/ and .gradle/, so the only cost
+is that the concurrent Gradle run of ~23:05 lost its work and must be re-run.
+
+Method B (sandbox-exec) was adopted for every subsequent run precisely because it
+touches nothing on disk.
+
+--------------------------------------------------------------------------------
+9. FILES AND LEFTOVERS
+--------------------------------------------------------------------------------
+Artifact:      web/out/installer/dist/anki-26.05-mac-apple.dmg
+               sha256 re-verified after all testing, unchanged:
+               d7cbca9b1def4411dc11b17258bf50defc894f651f413186bacbed20c3e41d45
+Installed app: /Applications/Anki.app        (left installed; ad-hoc signed)
+Repo change:   web/justfile — added `installer` and `installer-build` recipes.
+               This work committed nothing, branched nothing and pushed nothing.
+               CONTRIBUTORS untouched. No file under web/rslib/src/readiness/
+               touched.
+               NOTE: a concurrent agent working on AnkiDroid committed the whole
+               working tree while this run was in progress, so the justfile edit
+               was swept into commit a5feff6f0 ("feat: AnkiDroid three-scores
+               screen on the shared engine") by that agent, not by this one. As
+               of the end of this run the tree is clean on branch
+               feat/readiness-scoring at 77f2cabd3, and the recipes are in HEAD.
+
+Scratch, safe to delete, where <scratch> =
+/private/tmp/claude-501/-Users-kellyhe-Documents-gauntlet-superbuilder/4407f89a-cdbb-4bc1-be8f-15924e603454/scratchpad
+  <scratch>/probe/AnkiProbe.app                    instrumented clone of the bundle
+  <scratch>/no-repo.sb                             seatbelt profile (Method B)
+  <scratch>/clean_launch.sh                        Method A script
+  <scratch>/clean_launch2.sh                       Method B script (the good one)
+  <scratch>/clean_probe.sh                         readiness probe driver
+  <scratch>/clean-launch-output.txt                Method A transcript
+  <scratch>/clean-launch2-output.txt               Method B transcript
+  <scratch>/clean-probe-output.txt                 readiness probe transcript
+  <scratch>/installer-build.log                    full `just installer` output
+  <scratch>/orphaned-gradle-output-Anki-Android    see section 8
+================================================================================
