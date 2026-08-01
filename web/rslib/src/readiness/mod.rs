@@ -8,6 +8,9 @@ pub(crate) mod coverage;
 #[cfg(test)]
 mod coverage_tests;
 pub(crate) mod data;
+pub(crate) mod deckgen;
+#[cfg(test)]
+mod deckgen_tests;
 pub(crate) mod evidence;
 #[cfg(test)]
 mod evidence_tests;

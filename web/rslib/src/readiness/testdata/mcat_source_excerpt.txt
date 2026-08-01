@@ -1,0 +1,69 @@
+# Vendored source document for the MCAT deck generator -- test fixture.
+#
+# LICENCE / ATTRIBUTION
+#   "MCAT Foundations: An Open Excerpt" (2026), written for the Anki Whimsified
+#   test suite and released under the Creative Commons Attribution 4.0
+#   International licence (CC BY 4.0). https://creativecommons.org/licenses/by/4.0/
+#
+#   The prose below is original to this repository rather than copied from a
+#   third-party textbook, so that nothing here claims a provenance it does not
+#   have -- fabricating an attribution is the exact failure this ticket exists
+#   to prevent. Its *shape* is that of an openly licensed textbook chapter, and
+#   a real CC BY excerpt (OpenStax and similar) can replace it verbatim without
+#   any change to the generator: the generator reads the format, not the prose.
+#
+# FORMAT
+#   Blocks are separated by blank lines. Lines beginning with '#' are comments.
+#   Within a block each line is `key: value`.
+#
+#   The first block is the document header:
+#       book         the work being cited            (required)
+#       license      the licence it is offered under (required)
+#       attribution  the attribution line the deck must carry (required)
+#
+#   Every later block is one source chunk:
+#       chapter      the chapter being cited         (required)
+#       topic        an AAMC outline topic key; may repeat (at least one)
+#       prompt       the question the card asks      (required)
+#       answer       the answer the card gives       (required)
+#       whimsy       a whimsical retrieval cue       (optional)
+#       concept-map  what each element of the cue maps to (required with whimsy)
+#       neutral      `yes` marks a neutral test item (optional)
+
+book: MCAT Foundations: An Open Excerpt
+license: CC BY 4.0
+attribution: "MCAT Foundations: An Open Excerpt" (2026) is licensed under CC BY 4.0. https://creativecommons.org/licenses/by/4.0/
+
+chapter: 1.2 Amino acids and the proteins they build
+topic: bb::amino_acids
+prompt: What distinguishes one of the twenty standard amino acids from another?
+answer: Only the side chain. Every standard amino acid shares an amino group, a carboxyl group and a hydrogen on the same central carbon; the side chain is the whole of the difference, and it is what decides charge, polarity and how the folded protein behaves.
+
+chapter: 1.4 Bioenergetics and the pacing of metabolism
+topic: bb::bioenergetics
+prompt: Why is a committed step rather than an entry step the useful place to regulate a pathway?
+answer: An entry step only decides whether material joins the pathway; a committed step decides the rate at which it moves through, and it is the rate that a cell needs to match to its energy state.
+whimsy: A turnstile, not a door. The door only says who may come in; the turnstile decides how fast anyone actually gets through, and it turns more stiffly when the room behind it is already full.
+concept-map: turnstile -> the committed, flux-controlling step; rate of turning -> reaction velocity; a room already full -> a high-energy state inhibiting the step; the door -> mere entry into the pathway, which regulates nothing.
+
+chapter: 3.1 Circulation and the geometry of the vascular bed
+topic: bb::organ_systems
+prompt: Why does blood slow down in the capillary bed even though each capillary is far narrower than the aorta?
+answer: Because velocity follows total cross-sectional area, not the width of any single vessel. The capillaries run in parallel, so their areas add; the sum vastly exceeds the aorta's, and by continuity the flow must slow.
+whimsy: One motorway feeding ten thousand village lanes. Each lane is narrower than the motorway, yet all ten thousand together are far wider, so the traffic crawls.
+concept-map: motorway -> the aorta; one narrow lane -> a single capillary's radius; ten thousand lanes together -> the total cross-sectional area of the bed; crawling traffic -> reduced velocity by continuity.
+
+chapter: 5.1 Water, acids and the behaviour of buffers
+topic: cp::water
+prompt: At what pH does a buffer resist change most strongly, and why there?
+answer: At pH equal to its pKa, where the concentrations of weak acid and conjugate base are equal. Equal reserves absorb a push in either direction equally well, and the log term of the Henderson-Hasselbalch relation is zero.
+whimsy: A seesaw with sandbags piled at both ends. Push down on either side and a sandbag shifts to absorb it, and it resists best when the two piles are equal.
+concept-map: sandbags at each end -> the reserves of weak acid and conjugate base; a push -> added strong acid or base; a bag shifting -> conversion between HA and A-; equal piles -> the point where pH equals pKa.
+
+chapter: 7.3 Conditioning and the shaping of behaviour
+topic: ps::learning
+prompt: What distinguishes classical from operant conditioning?
+answer: Which party moves first. In classical conditioning the world acts on the learner and an involuntary response follows; in operant conditioning the learner acts on the world and its consequences shape whether the behaviour recurs.
+whimsy: A doorbell you learn to salivate at, against a vending machine you learn to kick.
+concept-map: the doorbell -> a neutral stimulus paired until conditioned; salivating -> an involuntary reflexive response; kicking the machine -> an emitted voluntary behaviour; the machine answering -> reinforcement as consequence.
+neutral: yes

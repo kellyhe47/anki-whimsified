@@ -132,7 +132,7 @@ CARDS = [
         "seesaw encodes why capacity is maximal at the midpoint, not merely that "
         "it is.",
         "Source": "Content category 5A — unique nature of water and its solutions",
-        "tags": ["mcat::cp::5a", "mcat::cp::acid_base"],
+        "tags": ["mcat::cp::5a", "mcat::cp::acids_and_bases"],
     },
     {
         "Front": "Why does blood pressure drop as blood moves from the aorta "

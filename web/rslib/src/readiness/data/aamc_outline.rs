@@ -115,7 +115,7 @@ const OUTLINE: &[OutlineCategory] = &[
         "bb::1d",
         "Principles of bioenergetics and fuel molecule metabolism",
         OutlineSection::BioBiochem,
-        &["bb::1d", "1d", "bb::bioenergetics", "bb::metabolism"],
+        &["bb::1d", "1d", "bb::bioenergetics", "bb::metabolism", "bb::glycolysis"],
     ),
     category(
         "bb::2a",
@@ -243,7 +243,7 @@ const OUTLINE: &[OutlineCategory] = &[
         "ps::7a",
         "Individual influences on behavior",
         OutlineSection::PsychSoc,
-        &["ps::7a", "7a", "ps::personality", "ps::motivation"],
+        &["ps::7a", "7a", "ps::personality", "ps::motivation", "ps::learning"],
     ),
     category(
         "ps::7b",
