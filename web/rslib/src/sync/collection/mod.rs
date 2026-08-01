@@ -6,6 +6,8 @@ pub mod chunks;
 pub mod download;
 pub mod finish;
 pub mod graves;
+#[cfg(test)]
+mod idempotency_tests;
 pub mod meta;
 pub mod normal;
 pub mod progress;
