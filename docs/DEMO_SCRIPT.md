@@ -71,11 +71,11 @@ The window title tells you which profile you're in — it currently reads
 | Leave the reviewer | Press **`d`**, or click **Decks** in the window toolbar |
 | **The dashboard** | macOS menu bar → **Tools** → **Exam Readiness…** (last item, below a separator line) |
 | **Switch profile** | macOS menu bar → **File** → **Switch Profile** → click **"2 Reporting"** → **Open** |
-| **Debug console** | **Ctrl + :** (Control + Shift + semicolon). **Control, not Command.** |
+| **Debug console** | **Cmd + Shift + ;**  — Qt swaps Ctrl/Cmd on macOS, so the "Ctrl+:" binding fires on Command |
 | Run in the console | Type the line → **Ctrl + Enter**. Output appears in the lower pane. **Escape** closes. |
 
 **Toggling whimsy, step by step:**
-1. Press **Ctrl + :** — a window titled *Debug Console* opens
+1. Press **Cmd + Shift + ;** — a window titled *Debug Console* opens
 2. Click into the **top text box** and type:
    `mw.col.set_config('whimsyEnabled', False)`
 3. Press **Ctrl + Enter**
@@ -131,7 +131,7 @@ The emulator responds to normal mouse clicks — click where you'd tap.
 **Now the ablation.** There is deliberately **no preferences toggle** — it's a config
 key, so it can't be flipped by accident mid-experiment.
 
-1. **Ctrl+:** opens the debug console
+1. **Cmd + Shift + ;** opens the debug console
 2. Type: `mw.col.set_config('whimsyEnabled', False)`
 3. **Ctrl+Enter** to run, then close the console
 4. Back to Decks → MCAT Demo → Study — same card, **no cue**
@@ -244,7 +244,7 @@ anki::notetype::render::hide_whimsy_cue_if_needed
 
 ## Gotchas
 
-- **Ctrl+:** is the debug console. **Ctrl+Enter** runs the statement.
+- **Cmd + Shift + ;** is the debug console (Qt swaps Ctrl/Cmd on macOS). **Ctrl+Enter** runs the statement.
 - After toggling the flag you must leave and re-enter the reviewer; an
   already-rendered card does not re-render in place.
 - The phone's collection is empty, so it abstains. That's a feature for the demo —
