@@ -1,11 +1,11 @@
 ---
 id: 004
 title: Three scores, ranges, and the give-up rule
-status: pending
+status: tests-written
 depends_on: [003]
 touches: [web/rslib/src/readiness/scores.rs, web/rslib/src/readiness/mod.rs]
 iterations: 0
-test_files: []
+test_files: [web/rslib/src/readiness/scores_tests.rs]
 branch: ""
 ---
 
