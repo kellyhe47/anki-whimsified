@@ -1,0 +1,28 @@
+# Two-way sync: desktop -> self-hosted server -> phone
+
+Captured: Sat Aug  1 01:13:54 CDT 2026
+
+## Setup (rerunnable by anyone)
+  SYNC_USER1=test:test SYNC_PORT=8081 \
+  SYNC_BASE=<dir> ./target/release/anki-sync-server
+
+  Desktop endpoint: http://127.0.0.1:8081/
+  Phone endpoint:   http://10.0.2.2:8081/   (emulator alias for the host)
+
+## Gotcha worth recording
+Anki dev mode binds Qt WebEngine remote debugging to 127.0.0.1:8080.
+A sync server on *:8080 is shadowed by that more specific binding and every
+request 404s against the debugger instead. Port 8081 avoids it.
+
+## What happened
+1. Desktop collection (6 MCAT cards) uploaded: full_upload_or_download(upload=True)
+2. AnkiDroid pointed at the same server via syncBaseUrl + syncBaseUrl_switch
+3. Phone synced down
+
+## Result on the phone
+  AnkiDroid title bar: '6 cards due'
+  Deck 'MCAT Demo': 6 new
+  Screenshot: android-synced-deck.png
+
+## Server request count
+8

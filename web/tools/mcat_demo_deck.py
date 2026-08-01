@@ -89,6 +89,95 @@ CARDS = [
         "the main organ systems",
         "tags": ["mcat::bb::3b", "mcat::bb::organ_systems"],
     },
+    {
+        "Front": "In glycolysis, which enzyme is the main rate-limiting step, "
+        "and what activates or inhibits it?",
+        "Back": "<b>Phosphofructokinase-1 (PFK-1)</b>.<br><br>"
+        "<b>Inhibited</b> by ATP and citrate (the cell is already rich).<br>"
+        "<b>Activated</b> by AMP and fructose-2,6-bisphosphate (the cell is "
+        "running low).",
+        "Whimsy": "PFK-1 is the turnstile at the entrance, not the door. The "
+        "door lets anyone in; the turnstile decides the rate. It reads the room "
+        "before turning: a room already full of energy (ATP) and leftovers "
+        "(citrate) makes it stiffen, while an empty, hungry room (AMP) makes it "
+        "spin freely.",
+        "ConceptMap": "turnstile rather than door &rarr; the committed, "
+        "flux-controlling step rather than mere entry &middot; rate of turning "
+        "&rarr; reaction velocity &middot; room already full of energy &rarr; high "
+        "[ATP] &middot; leftovers &rarr; citrate signalling a stocked citric acid "
+        "cycle &middot; empty hungry room &rarr; high [AMP] signalling depletion. "
+        "The turnstile is chosen over a door precisely because a door is binary "
+        "and a rate-limiting enzyme is not.",
+        "Source": "Content category 1D — principles of bioenergetics and fuel "
+        "molecule metabolism",
+        "tags": ["mcat::bb::1d", "mcat::bb::glycolysis"],
+    },
+    {
+        "Front": "What does a buffer do, and at what pH is it strongest?",
+        "Back": "A buffer resists pH change by converting strong acid or base "
+        "into weak.<br><br>It is <b>strongest when pH = pK<sub>a</sub></b>, where "
+        "[A<sup>&minus;</sup>] = [HA] &mdash; equal reserves to absorb a push in "
+        "either direction.<br><br>pH = pK<sub>a</sub> + log([A<sup>&minus;</sup>]/[HA])",
+        "Whimsy": "A buffer is a seesaw with sandbags piled at both ends. Push "
+        "down on either side and a sandbag shifts to absorb it. It resists best "
+        "when the piles are equal &mdash; that balance point is pK<sub>a</sub>. "
+        "Load one end and it still works, but a shove from the light side now "
+        "tips it easily.",
+        "ConceptMap": "sandbags at each end &rarr; the reserves of conjugate base "
+        "and weak acid &middot; a push &rarr; added strong acid or base &middot; a "
+        "sandbag shifting &rarr; conversion between HA and A<sup>&minus;</sup> "
+        "&middot; equal piles &rarr; [A<sup>&minus;</sup>] = [HA], the point where "
+        "the log term is zero and pH = pK<sub>a</sub> &middot; tipping easily when "
+        "lopsided &rarr; falling buffer capacity away from pK<sub>a</sub>. The "
+        "seesaw encodes why capacity is maximal at the midpoint, not merely that "
+        "it is.",
+        "Source": "Content category 5A — unique nature of water and its solutions",
+        "tags": ["mcat::cp::5a", "mcat::cp::acid_base"],
+    },
+    {
+        "Front": "Why does blood pressure drop as blood moves from the aorta "
+        "into the capillary bed, even though the capillaries are far narrower?",
+        "Back": "Because <b>total cross-sectional area</b> rises enormously: "
+        "billions of capillaries in parallel far exceed the aorta's area.<br><br>"
+        "By continuity (A&middot;v = constant), velocity <b>falls</b>. Slow flow "
+        "plus huge area means low pressure &mdash; and slow transit is exactly "
+        "what gas exchange needs.",
+        "Whimsy": "One motorway feeding ten thousand village lanes. Each lane is "
+        "narrower than the motorway, yet all ten thousand together are far wider, "
+        "so the traffic crawls. That crawl is the point: nobody unloads a delivery "
+        "at speed.",
+        "ConceptMap": "motorway &rarr; aorta &middot; one lane narrower &rarr; a "
+        "single capillary's small radius &middot; ten thousand lanes together far "
+        "wider &rarr; total cross-sectional area of the capillary bed &middot; "
+        "traffic crawling &rarr; reduced flow velocity by continuity &middot; "
+        "unloading deliveries &rarr; gas and nutrient exchange. The image exists "
+        "to separate <i>individual</i> radius from <i>aggregate</i> area, which is "
+        "the exact confusion the question tests.",
+        "Source": "Content category 4B — importance of fluids for the circulation "
+        "of blood, gas movement, and gas exchange",
+        "tags": ["mcat::cp::4b", "mcat::cp::fluids"],
+    },
+    {
+        "Front": "Distinguish classical from operant conditioning.",
+        "Back": "<b>Classical</b>: an involuntary response is drawn to a new "
+        "stimulus by pairing (Pavlov). The learner is passive.<br><br>"
+        "<b>Operant</b>: a voluntary behaviour is shaped by its consequences "
+        "(Skinner). The learner acts first.",
+        "Whimsy": "Classical conditioning is a doorbell you learn to salivate at. "
+        "Operant conditioning is a vending machine you learn to kick. In the first "
+        "the world acts on you and your body answers; in the second you act on the "
+        "world and it answers back.",
+        "ConceptMap": "doorbell &rarr; a neutral stimulus paired until it is "
+        "conditioned &middot; salivating &rarr; an involuntary reflexive response "
+        "&middot; the world acting first &rarr; the passive learner of classical "
+        "conditioning &middot; kicking the machine &rarr; an emitted voluntary "
+        "behaviour &middot; the machine answering &rarr; reinforcement or "
+        "punishment as consequence &middot; you acting first &rarr; the active "
+        "learner of operant conditioning. Which party moves first is the "
+        "discriminating feature, and it is what the image encodes.",
+        "Source": "Content category 7A — individual influences on behavior",
+        "tags": ["mcat::ps::7a", "mcat::ps::learning"],
+    },
 ]
 
 
