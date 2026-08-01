@@ -8,6 +8,7 @@ use crate::build::BuildProfile;
 use crate::build::FilesHandle;
 use crate::cargo::CargoBuild;
 use crate::cargo::RustOutput;
+use crate::git::locate_git_dir;
 use crate::glob;
 use crate::inputs;
 use crate::Build;
@@ -22,7 +23,10 @@ impl BuildAction for ConfigureBuild {
     fn files(&mut self, build: &mut impl FilesHandle) {
         build.add_inputs("cmd", inputs![":build:configure_bin"]);
         // reconfigure when external inputs change
-        build.add_inputs("", inputs!["$builddir/env", ".version", ".git"]);
+        build.add_inputs("", inputs!["$builddir/env", ".version"]);
+        if let Some(git_dir) = locate_git_dir() {
+            build.add_inputs("", git_dir);
+        }
         build.add_outputs("", ["build.ninja"])
     }
 
