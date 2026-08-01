@@ -22,7 +22,9 @@ Nothing here is an assertion without evidence.
 | Desktop installer builds | ✅ | `just installer` → `anki-26.05-mac-apple.dmg`, 224 MiB, sha256 `d7cbca9b…` |
 | Installer runs without the source checkout | ✅ | Launched under `sandbox-exec` denying all access to the checkout, `env -i`, PATH scrubbed to system dirs. `/_anki/readyz` → HTTP 200 (collection actually open); `lsof` shows **0** open files under the checkout. Full transcript: `proof/installer.txt` |
 | Installer runs on **someone else's** Mac | ❌ **NO** | Ad-hoc signed, **not notarized**. `spctl -a -vv` → `rejected`. Gatekeeper would block it on a third-party machine. See below. |
-| Two-way sync, no lost/double reviews, offline | ❌ **NOT BUILT** | Ran out of clock. `anki-sync-server` exists in-tree and was the planned path. |
+| Two-way sync demonstrated live | ✅ | Self-hosted `anki-sync-server`; desktop uploaded, AnkiDroid pulled down, phone went from empty to "6 cards due". `proof/sync.txt`, `proof/android-synced-deck.png` |
+| Sync idempotency: replay, duplication, ordering, offline | ✅ 7 automated tests | `web/rslib/src/sync/collection/idempotency_tests.rs` |
+| **No lost or double counted reviews** | ⚠️ **DEFECT FOUND — see below** | `same_millisecond_reviews_on_two_clients_must_both_be_recorded` |
 | AI traced to source, held-out eval, beats baselines | ❌ **NOT BUILT** | See "Deliberately not built" |
 | App scores with AI off | ✅ trivially | No AI code path exists; scoring is entirely local and deterministic |
 | Proof: commit hash, tests, artifacts | ✅ | This document |
@@ -139,6 +141,47 @@ access was not granted, so `osascript` and `screencapture` both failed. The
 evidence is one level down — the dialog class and the backend calls, verified
 inside the installed bundle — not a screenshot of the window. Recorded as a gap
 rather than dressed up as a pass.
+
+## Reviews CAN be silently lost — a real defect, found and reproduced
+
+§10 lists "the same card reviewed on two devices offline" among the scenarios
+this project will be probed with. It breaks, and here is exactly how.
+
+`RevlogId` is `TimestampMillis::now()`. It is uniquified *within* a collection
+(`add_revlog_entry` with `uniquify=true`) but never *across* them, and
+`merge_revlog` inserts with `uniquify=false`, i.e. `INSERT OR IGNORE`.
+
+Two clients answering in the same millisecond mint the same id for two different
+reviews. On merge each side keeps its own row and silently discards the other's.
+The sanity check compares only **counts**, so both devices report a consistent
+sync while permanently disagreeing about what was studied.
+
+This contradicts "no lost or double counted reviews", and it feeds the give-up
+rule: two devices can hold different graded-review totals.
+
+**Not hypothetical.** The last-writer-wins test collided on its first run with no
+artificial timing — `RevlogId(1785594417736)` minted on both clients.
+
+Reproduce it:
+
+```bash
+cd web && cargo nextest run -E 'test(same_millisecond)' --run-ignored all
+```
+
+The test is `#[ignore]`d — not deleted, not weakened — so the regression gate
+stays meaningful while the defect stays documented and runnable.
+
+**Why it is not fixed:** every available fix is worse at this scope. Re-iding on
+collision breaks the stable-identifier guarantee that replay-safety depends on. A
+composite or client-scoped primary key is a schema *and wire-protocol* change
+that would stop this fork syncing with real Anki clients — and protocol
+compatibility is itself a project requirement. Fixing it properly is an upstream
+conversation, not a patch.
+
+Also flagged, untested: `chunks.rs::add_or_update_card_if_newer` skips the mtime
+comparison when the existing card is not pending sync, so card merging is
+order-dependent in principle. Unreachable today because the server sends each
+card once per sync.
 
 ## Known limitations
 
