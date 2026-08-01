@@ -1,7 +1,7 @@
 ---
 id: 010
 title: OpenStax deck generation with citations and topic tags
-status: tests-written
+status: green
 depends_on: [006]
 touches: [web/tools/mcat_deck/, web/rslib/src/readiness/notetype.rs]
 iterations: 0
@@ -95,3 +95,26 @@ at all — but they were still mistakes in authored content.
 - Determinism is pinned as identical `GeneratedDeck` across runs, path-independent,
   identical note fields and tags across two collections. Note ids, guids and mtimes
   necessarily differ and are excluded.
+
+## Attempt log
+
+- iter 1: green. 679 passed, 7 skipped.
+- **Atomicity:** `generate_mcat_deck` runs the whole parse + validate pass against
+  an in-memory `GeneratedDeck` before opening anything, so a rejection returns
+  before a single write. Writes then happen inside one `transact_no_undo` using
+  `_inner` variants, so notetype + deck + notes roll back together.
+- **Determinism:** a `HashMap` per block would have been both lossy on repeated
+  `topic:` keys and hash-seeded in iteration order. Blocks hold
+  `Vec<(String, String)>` in source order; tags are built topics-in-source-order
+  then `source-derived` then `neutral-test`; no set, no sort of hashed items;
+  outline lookup is a linear scan of the static slice.
+- **Beyond spec, deliberately:** `license:` is required non-empty. No test
+  exercises its absence, but redistributing cards from a work stating no licence
+  is the same class of fabrication this ticket guards against.
+- **Beyond spec, deliberately:** `neutral:` accepts only `yes`; any other value is
+  a loud error rather than silently reading as "not neutral", because a typo there
+  would contaminate the experiment's control arm.
+- Whimsy/concept-map validation runs on the raw chunk *before* the neutral strip,
+  so a neutral chunk supplying an unmapped cue is still rejected.
+- Verified after rebuild: the six shipped demo cards now report **zero unmapped
+  topics**.
