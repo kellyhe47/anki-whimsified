@@ -7,7 +7,11 @@ use std::collections::HashMap;
 use super::CardTemplate;
 use super::Notetype;
 use super::NotetypeKind;
+use crate::config::BoolKey;
 use crate::prelude::*;
+use crate::readiness::mnemonic::strip_whimsy_cue;
+use crate::readiness::mnemonic::whimsy_cue_visible;
+use crate::readiness::mnemonic::WHIMSY_CUE_CLASS;
 use crate::template::field_is_empty;
 use crate::template::render_card;
 use crate::template::ParsedTemplate;
@@ -147,13 +151,46 @@ impl Collection {
             tr: &self.tr,
             partial_render,
         })?;
+        let mut qnodes = response.qnodes;
+        let mut anodes = response.anodes;
+        self.hide_whimsy_cue_if_needed(note, &mut qnodes, &mut anodes);
+
         Ok(RenderCardOutput {
-            qnodes: response.qnodes,
-            anodes: response.anodes,
+            qnodes,
+            anodes,
             css: nt.config.css.clone(),
             latex_svg: nt.config.latex_svg,
             is_empty: response.is_empty,
         })
+    }
+
+    /// Remove the whimsy cue from rendered output when this note may not show
+    /// one -- because whimsy is disabled, or because the note is a neutral
+    /// test item.
+    ///
+    /// This is deliberately a render-time edit: the stored note keeps its cue
+    /// so that turning whimsy back on restores it untouched.
+    fn hide_whimsy_cue_if_needed(
+        &self,
+        note: &Note,
+        qnodes: &mut [RenderedNode],
+        anodes: &mut [RenderedNode],
+    ) {
+        let has_cue = qnodes
+            .iter()
+            .chain(anodes.iter())
+            .any(|node| node_text(node).is_some_and(|t| t.contains(WHIMSY_CUE_CLASS)));
+        if !has_cue {
+            return;
+        }
+        if whimsy_cue_visible(self.get_config_bool(BoolKey::WhimsyEnabled), &note.tags) {
+            return;
+        }
+        for node in qnodes.iter_mut().chain(anodes.iter_mut()) {
+            if let RenderedNode::Text { text } = node {
+                *text = strip_whimsy_cue(text);
+            }
+        }
     }
 
     /// Add special fields if they don't clobber note fields.
@@ -187,6 +224,14 @@ impl Collection {
             .or_insert_with(|| card.id.to_string().into());
 
         Ok(())
+    }
+}
+
+/// The literal text of a rendered node, if it has any.
+fn node_text(node: &RenderedNode) -> Option<&str> {
+    match node {
+        RenderedNode::Text { text } => Some(text),
+        RenderedNode::Replacement { .. } => None,
     }
 }
 
