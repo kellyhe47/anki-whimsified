@@ -17,6 +17,7 @@ from anki import (
     import_export_pb2,
     links_pb2,
     notes_pb2,
+    readiness_pb2,
     scheduler_pb2,
     search_pb2,
     stats_pb2,

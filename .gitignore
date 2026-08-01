@@ -11,3 +11,11 @@ Thumbs.db
 /.claude/worktrees/
 
 # Each application owns its build and tool ignores in its own .gitignore.
+
+# Local secrets - never commit
+.env
+.env.*
+!.env.example
+
+# local backend symlink for shared-engine build
+Anki-Android-Backend

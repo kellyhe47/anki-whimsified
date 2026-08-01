@@ -1,0 +1,72 @@
+# Shared-engine proof: readiness code present in the Android binary
+
+Generated: Fri Jul 31 21:46:54 CDT 2026
+Binary: anki-android-backend/target/aarch64-linux-android/debug/librsdroid.so
+
+## Provenance
+rsdroid consumes anki as a path dependency: anki = { path = "../anki/rslib" }
+That path is symlinked to this fork:
+    lrwxr-xr-x@ 1 kellyhe  staff  22 Jul 31 21:32 anki -> ../anki-whimsified/web
+
+## file(1)
+    target/aarch64-linux-android/debug/librsdroid.so: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, not stripped
+
+## Readiness symbols in the Android .so
+    00000000014da5c8 t anki::notetype::render::_$LT$impl$u20$anki..collection..Collection$GT$::hide_whimsy_cue_if_needed::h4a8e3a1d9e4e326c
+    00000000013c6020 t anki::notetype::render::_$LT$impl$u20$anki..collection..Collection$GT$::hide_whimsy_cue_if_needed::_$u7b$$u7b$closure$u7d$$u7d$::h79d14264dada8bf3
+    00000000013c603c t anki::notetype::render::_$LT$impl$u20$anki..collection..Collection$GT$::hide_whimsy_cue_if_needed::_$u7b$$u7b$closure$u7d$$u7d$::_$u7b$$u7b$closure$u7d$$u7d$::hf5f251740a35ed9a
+    0000000001481b74 t anki::services::_$LT$impl$u20$anki..backend..Backend$GT$::run_backend_readiness_service_method::h61d6370de8ed8ef6
+    00000000011ffef8 t anki::readiness::service::abstaining_score::h380c24f2162567b1
+    000000000164d4ec t anki::readiness::service::abstaining_score::_$u7b$$u7b$closure$u7d$$u7d$::h215bc29f23eb197d
+    00000000014dd954 t anki::readiness::service::_$LT$impl$u20$anki..services..ReadinessService$u20$for$u20$anki..collection..Collection$GT$::three_scores::hcc2ce2ff750ab0a6
+    00000000014ddaa4 t anki::readiness::service::_$LT$impl$u20$anki..services..ReadinessService$u20$for$u20$anki..collection..Collection$GT$::topic_mastery::h5afca3c467a0a081
+    00000000011ed660 t anki::readiness::mnemonic::class_attr::he68ebb3aebebd24b
+    00000000018bf36c t anki::readiness::mnemonic::class_attr::_$u7b$$u7b$closure$u7d$$u7d$::ha28311a1fc0d6be0
+    00000000011ed978 t anki::readiness::mnemonic::end_of_element::h198cd9b96e997186
+    00000000018bf380 t anki::readiness::mnemonic::end_of_element::_$u7b$$u7b$closure$u7d$$u7d$::h20ee84531b177019
+    00000000018bf3e4 t anki::readiness::mnemonic::end_of_element::_$u7b$$u7b$closure$u7d$$u7d$::h4792e37b3f2df8ed
+    00000000018bf438 t anki::readiness::mnemonic::end_of_element::_$u7b$$u7b$closure$u7d$$u7d$::h8e464bfb76efbea8
+    00000000011edcac t anki::readiness::mnemonic::parse_start_tag::ha16b9228c2da151c
+    00000000018bf444 t anki::readiness::mnemonic::parse_start_tag::_$u7b$$u7b$closure$u7d$$u7d$::h5a28cfcd3b1aac43
+    00000000018bf470 t anki::readiness::mnemonic::parse_start_tag::_$u7b$$u7b$closure$u7d$$u7d$::he434b7c5f4bcb018
+    00000000018bf494 t anki::readiness::mnemonic::parse_start_tag::_$u7b$$u7b$closure$u7d$$u7d$::hfe455a4c7f3fd147
+    00000000018bf4fc t anki::readiness::mnemonic::parse_start_tag::_$u7b$$u7b$closure$u7d$$u7d$::_$u7b$$u7b$closure$u7d$$u7d$::hdbc983fdb80da412
+    00000000011edfb0 t anki::readiness::mnemonic::strip_whimsy_cue::hbe22b9daeba44e79
+    00000000011ee2f0 t anki::readiness::mnemonic::whimsy_cue_visible::hf25e1946474bfd6d
+    00000000018bf52c t anki::readiness::mnemonic::whimsy_cue_visible::_$u7b$$u7b$closure$u7d$$u7d$::h89c1c44516402518
+    00000000015b4018 t core::ptr::drop_in_place$LT$alloc..vec..Vec$LT$alloc..string..String$GT$..extend_trusted$LT$core..iter..adapters..map..Map$LT$core..slice..iter..Iter$LT$$RF$str$GT$$C$anki..readiness..service..abstaining_score..$u7b$$u7b$closure$u7d$$u7d$$GT$$GT$..$u7b$$u7b$closure$u7d$$u7d$$GT$::h87d184322495cf01
+    00000000015b7074 t core::ptr::drop_in_place$LT$core..iter..traits..iterator..Iterator..for_each..call$LT$alloc..string..String$C$alloc..vec..Vec$LT$alloc..string..String$GT$..extend_trusted$LT$core..iter..adapters..map..Map$LT$core..slice..iter..Iter$LT$$RF$str$GT$$C$anki..readiness..service..abstaining_score..$u7b$$u7b$closure$u7d$$u7d$$GT$$GT$..$u7b$$u7b$closure$u7d$$u7d$$GT$..$u7b$$u7b$closure$u7d$$u7d$$GT$::hf20337630c5d1367
+    00000000025cce54 t core::ptr::drop_in_place$LT$anki_proto..readiness..Score$GT$::hc78271a96ef50e72
+    00000000025cd500 t core::ptr::drop_in_place$LT$anki_proto..readiness..TopicMastery$GT$::h85bf17a02b03a6a0
+    00000000015bc254 t core::ptr::drop_in_place$LT$core..iter..adapters..map..map_fold$LT$$RF$$RF$str$C$alloc..string..String$C$$LP$$RP$$C$anki..readiness..service..abstaining_score..$u7b$$u7b$closure$u7d$$u7d$$C$core..iter..traits..iterator..Iterator..for_each..call$LT$alloc..string..String$C$alloc..vec..Vec$LT$alloc..string..String$GT$..extend_trusted$LT$core..iter..adapters..map..Map$LT$core..slice..iter..Iter$LT$$RF$str$GT$$C$anki..readiness..service..abstaining_score..$u7b$$u7b$closure$u7d$$u7d$$GT$$GT$..$u7b$$u7b$closure$u7d$$u7d$$GT$..$u7b$$u7b$closure$u7d$$u7d$$GT$..$u7b$$u7b$closure$u7d$$u7d$$GT$::he8056546369f3125
+    00000000015bfbd4 t core::ptr::drop_in_place$LT$anki_proto..readiness..ThreeScoresResponse$GT$::h6f14e185f32c5b6f
+    00000000015c025c t core::ptr::drop_in_place$LT$anki_proto..readiness..TopicMasteryResponse$GT$::h62a73718e75f0eae
+    00000000025cec04 t core::ptr::drop_in_place$LT$$u5b$anki_proto..readiness..TopicMastery$u5d$$GT$::h9d5d646cfd7a0b48
+    00000000025cff34 t core::ptr::drop_in_place$LT$core..option..Option$LT$anki_proto..readiness..Score$GT$$GT$::h9e985858e84bb537
+    00000000015c65ac t core::ptr::drop_in_place$LT$alloc..vec..Vec$LT$anki_proto..readiness..TopicMastery$GT$$GT$::hcb7e165b67c48c27
+    00000000015c8968 t core::ptr::drop_in_place$LT$alloc..raw_vec..RawVec$LT$anki_proto..readiness..TopicMastery$GT$$GT$::h5f31efcd876f29d8
+    00000000023a5208 t tokio::runtime::io::registration::Registration::clear_readiness::h7c620ff70d3362ff
+    00000000023c2ee4 t tokio::runtime::io::scheduled_io::ScheduledIo::set_readiness::h080886088b7f3bcf
+    00000000023c2f4c t tokio::runtime::io::scheduled_io::ScheduledIo::set_readiness::h7a7a902953ead53a
+    00000000023c2fb4 t tokio::runtime::io::scheduled_io::ScheduledIo::set_readiness::_$u7b$$u7b$closure$u7d$$u7d$::h25b8ece20d5fe1bb
+    00000000023c3100 t tokio::runtime::io::scheduled_io::ScheduledIo::set_readiness::_$u7b$$u7b$closure$u7d$$u7d$::he2f9f49fd633d458
+    00000000023c324c t tokio::runtime::io::scheduled_io::ScheduledIo::poll_readiness::hc163fa68347570e7
+    00000000023c35f4 t tokio::runtime::io::scheduled_io::ScheduledIo::clear_readiness::hbb65f90b1bbc3b5e
+    00000000023c3654 t tokio::runtime::io::scheduled_io::ScheduledIo::clear_readiness::_$u7b$$u7b$closure$u7d$$u7d$::hfadb11092dd27d73
+    00000000025c1a7c t _$LT$anki_proto..readiness..Score$u20$as$u20$core..default..Default$GT$::default::hc09b10a93bfbf906
+    00000000011fb4a4 t _$LT$anki_proto..readiness..Score$u20$as$u20$prost..message..Message$GT$::encode_raw::haff2c3945b18a142
+    0000000001670f30 t _$LT$anki_proto..readiness..Score$u20$as$u20$prost..message..Message$GT$::encoded_len::h7bc4613659e71f54
+    00000000011fba54 t _$LT$anki_proto..readiness..TopicMastery$u20$as$u20$prost..message..Message$GT$::encode_raw::h01bd9141da5ea7c9
+    0000000001671bb4 t _$LT$anki_proto..readiness..TopicMastery$u20$as$u20$prost..message..Message$GT$::encoded_len::h019a155638ebbb68
+    00000000025c1b1c t _$LT$anki_proto..readiness..ThreeScoresRequest$u20$as$u20$core..default..Default$GT$::default::h02cd7f59997f1c50
+    00000000011fc4e0 t _$LT$anki_proto..readiness..ThreeScoresRequest$u20$as$u20$prost..message..Message$GT$::merge_field::h3f59d466acba0ae0
+    00000000025c1b20 t _$LT$anki_proto..readiness..TopicMasteryRequest$u20$as$u20$core..default..Default$GT$::default::hdbb691ba2f9419b6
+    00000000011fc748 t _$LT$anki_proto..readiness..ThreeScoresResponse$u20$as$u20$prost..message..Message$GT$::encode_raw::h80124aceeeb71945
+    00000000016728c4 t _$LT$anki_proto..readiness..ThreeScoresResponse$u20$as$u20$prost..message..Message$GT$::encoded_len::h626043806acbdf9b
+    00000000011fc7fc t _$LT$anki_proto..readiness..ThreeScoresResponse$u20$as$u20$prost..message..Message$GT$::encoded_len::_$u7b$$u7b$closure$u7d$$u7d$::h4df9aad8ae670cad
+    00000000011fc818 t _$LT$anki_proto..readiness..ThreeScoresResponse$u20$as$u20$prost..message..Message$GT$::encoded_len::_$u7b$$u7b$closure$u7d$$u7d$::h7eac16f8d3bf26d5
+    00000000011fc834 t _$LT$anki_proto..readiness..ThreeScoresResponse$u20$as$u20$prost..message..Message$GT$::encoded_len::_$u7b$$u7b$closure$u7d$$u7d$::h92f76916fa6dbbaa
+    00000000011fc850 t _$LT$anki_proto..readiness..TopicMasteryRequest$u20$as$u20$prost..message..Message$GT$::merge_field::h7feeb0860f485a4d
+    00000000025c1598 t _$LT$anki_proto..readiness..topic_mastery..State$u20$as$u20$core..default..Default$GT$::default::h9a851603034c8574
+    00000000011fc870 t _$LT$anki_proto..readiness..TopicMasteryResponse$u20$as$u20$prost..message..Message$GT$::encode_raw::hdf923f0ee89fc32a
+    0000000001672a70 t _$LT$anki_proto..readiness..TopicMasteryResponse$u20$as$u20$prost..message..Message$GT$::encoded_len::h8e9d6160dac12590

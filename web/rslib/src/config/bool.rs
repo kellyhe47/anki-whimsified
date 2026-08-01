@@ -42,6 +42,9 @@ pub enum BoolKey {
     FsrsLegacyEvaluate,
     LoadBalancerEnabled,
     FsrsShortTermWithStepsEnabled,
+    /// Whether whimsical mnemonic cues are shown. Doubles as the ablation
+    /// control for measuring whether whimsy helps, so it must default to on.
+    WhimsyEnabled,
     #[strum(to_string = "normalize_note_text")]
     NormalizeNoteText,
     #[strum(to_string = "dayLearnFirst")]
@@ -68,6 +71,7 @@ impl Collection {
             | BoolKey::RestorePositionReviewer
             | BoolKey::LoadBalancerEnabled
             | BoolKey::FsrsHealthCheck
+            | BoolKey::WhimsyEnabled
             | BoolKey::NormalizeNoteText => self.get_config_optional(key).unwrap_or(true),
 
             // other options default to false

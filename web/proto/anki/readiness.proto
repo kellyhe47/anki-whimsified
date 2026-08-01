@@ -1,0 +1,99 @@
+// Copyright: Ankitects Pty Ltd and contributors
+// License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package anki.readiness;
+
+service ReadinessService {
+  rpc TopicMastery(TopicMasteryRequest) returns (TopicMasteryResponse);
+  rpc ThreeScores(ThreeScoresRequest) returns (ThreeScoresResponse);
+  rpc CoverageMap(CoverageMapRequest) returns (CoverageMapResponse);
+}
+
+// Implicitly includes any of the above methods that are not listed in the
+// backend service.
+service BackendReadinessService {}
+
+// Per-topic mastery, derived from the cards tagged with that topic.
+message TopicMastery {
+  // How much we actually know about this topic's mastery. The zero value is
+  // deliberately UNKNOWN so that an unset `state` is never read as a
+  // legitimate "0% mastery" measurement.
+  enum State {
+    UNKNOWN = 0;
+    INFERRED = 1;
+    MEASURED = 2;
+  }
+
+  string topic = 1;
+  uint32 cards_total = 2;
+  uint32 cards_with_history = 3;
+  float avg_retrievability = 4;
+  uint32 graded_reviews = 5;
+  float mastery = 6;
+  bool covered = 7;
+  State state = 8;
+}
+
+// A single score, with the evidence backing it (or the evidence it is missing).
+message Score {
+  float estimate = 1;
+  float low = 2;
+  float high = 3;
+  float confidence = 4;
+  float coverage_pct = 5;
+  uint32 evidence_count = 6;
+  int64 last_updated = 7;
+  repeated string reasons = 8;
+  // True when there is not enough evidence to report a meaningful estimate.
+  bool abstaining = 9;
+  repeated string missing_evidence = 10;
+}
+
+message TopicMasteryRequest {}
+
+message TopicMasteryResponse {
+  repeated TopicMastery topics = 1;
+}
+
+message ThreeScoresRequest {}
+
+message ThreeScoresResponse {
+  Score memory = 1;
+  Score performance = 2;
+  Score readiness = 3;
+}
+
+// One category of the AAMC content outline, and what the deck has to say about
+// it. Every category is reported whether the deck reaches it or not: a category
+// the deck ignores is the most useful thing the map can tell a learner, so it
+// is named rather than merely counted.
+message CategoryCoverage {
+  // The category's stable id from the outline data, eg `bb::1a`.
+  string id = 1;
+  // The category's name as the AAMC writes it.
+  string name = 2;
+  // The exam section the category belongs to, as a display label.
+  string section = 3;
+  // True only when at least one card in this category has been studied.
+  bool covered = 4;
+  uint32 cards_total = 5;
+  uint32 cards_with_history = 6;
+  // The deck topics that mapped to this category.
+  repeated string topics = 7;
+}
+
+message CoverageMapRequest {}
+
+message CoverageMapResponse {
+  // Every outline category, covered or not.
+  repeated CategoryCoverage categories = 1;
+  // Deck topics that matched no outline category, named individually rather
+  // than dropped.
+  repeated string unmapped_topics = 2;
+  // Covered categories over total categories, in [0.0, 100.0].
+  float coverage_pct = 3;
+}
