@@ -1,3 +1,5 @@
 * text=auto eol=lf
-*.ftl -linguist-detectable
-cargo/remote/* linguist-vendored
+
+*.bat text eol=crlf
+*.png binary
+*.zip binary

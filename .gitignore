@@ -1,26 +1,13 @@
-__pycache__
-.mypy_cache
+# Repository-level operating-system and editor files.
 .DS_Store
-anki.prof
-target
-/user.bazelrc
-.dmypy.json
+Thumbs.db
 /.idea/
-/.vscode
-/.bazel
-/windows.bazelrc
-/out
-node_modules
-.n2_db
-.ninja_log
-.ninja_deps
-/extra
-yarn-error.log
-ts/.svelte-kit
-.yarn
-.claude/settings.local.json
-.claude/user.md
-.venv
-docs/_build/
-docs/autoapi/
-.complexipy_cache
+/.vscode/
+**/.yarn/
+
+# Local agent settings and worktrees.
+/.claude/settings.local.json
+/.claude/user.md
+/.claude/worktrees/
+
+# Each application owns its build and tool ignores in its own .gitignore.
