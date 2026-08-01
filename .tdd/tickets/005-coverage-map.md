@@ -1,7 +1,7 @@
 ---
 id: 005
 title: Coverage map against the AAMC content outline
-status: tests-written
+status: green
 depends_on: [002]
 touches: [web/rslib/src/readiness/coverage.rs, web/rslib/src/readiness/data/aamc_outline.rs, web/rslib/src/readiness/mod.rs]
 iterations: 0

@@ -1,7 +1,7 @@
 ---
 id: 003
 title: Learner model — mastery and measured/inferred/unknown states
-status: tests-written
+status: green
 depends_on: [002]
 touches: [web/rslib/src/readiness/learner_model.rs, web/rslib/src/readiness/mod.rs]
 iterations: 0
@@ -54,3 +54,26 @@ Written by the test-writer agent. Prefer table-driven tests — the monotonicity
 and boundary criteria share a fixture shape.
 
 ## Attempt log
+
+## Stated assumptions — must appear in the README, not presented as derived
+
+- `MEASURED_REVIEW_THRESHOLD = 3`. Chosen, not empirically derived. One or two
+  graded reviews is not a measurement.
+- Mastery (direct) = `clamp01(avg_retrievability) * min(1, graded_reviews / 3)`
+  — recall probability, linearly discounted while evidence is short of threshold.
+  `None` when zero graded reviews or no finite retrievability.
+- Sibling-inferred mastery = mean of studied siblings' direct masteries.
+- Confidence bands, deliberately non-overlapping so inferred < measured always:
+  measured `0.6 + 0.4*r/(r+3)`; direct-inferred `0.2 + 0.2*r/3` (max 0.33);
+  sibling-inferred `0.15`; unknown `0.0`.
+
+## Attempt log
+
+- iter 1: green. 11 tests. Full Rust suite 605/605.
+- Commits: tests `fa5d08192`, implementation `73a3909b7`.
+- **Open question for ticket 004:** `MEASURED` with `mastery: None` is reachable
+  (a topic past the review threshold but with no FSRS state). The implementer
+  returned `None` rather than inventing a prior, consistent with "absent is not
+  zero". Any aggregator in 004 must skip such topics rather than coerce them.
+- `section_of` on a separator-less topic (e.g. the canonified `blank`) returns the
+  whole string as its own section, so malformed topics cannot infer from each other.
