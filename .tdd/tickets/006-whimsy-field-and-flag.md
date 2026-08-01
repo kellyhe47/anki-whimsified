@@ -1,11 +1,11 @@
 ---
 id: 006
 title: Whimsy cue field, strip flag, and neutral-test guarantee
-status: pending
+status: tests-written
 depends_on: [001]
 touches: [web/rslib/src/readiness/mnemonic.rs, web/rslib/src/readiness/mod.rs, web/rslib/src/config/]
 iterations: 0
-test_files: []
+test_files: [web/rslib/src/readiness/mnemonic_tests.rs]
 branch: ""
 ---
 

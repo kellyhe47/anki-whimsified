@@ -1,7 +1,7 @@
 ---
 id: 001
 title: Readiness proto, module skeleton, and service wiring
-status: tests-written
+status: green
 depends_on: []
 touches: [web/proto/anki/readiness.proto, web/rslib/proto/src/lib.rs, web/rslib/src/lib.rs, web/rslib/src/readiness/mod.rs, web/rslib/src/readiness/service.rs]
 iterations: 0
@@ -82,3 +82,18 @@ Tests in `web/rslib/src/readiness/tests.rs`, declared from `mod.rs` via
   `tests.rs`, so the implementation file is editable while tests stay locked.
 
 ## Attempt log
+
+- iter 1: implemented both service methods; all 5 ticket tests green, full Rust
+  gate 559/559. Green in one iteration.
+- Lock event (NOT charged as an iteration): `tests.rs` showed a 4-line diff after
+  the implementation dispatch. Inspected — a pure rustfmt line-wrap of the
+  `assert!(score.abstaining, ...)` call, identical condition and message, no
+  weakening. Root cause: the lock commit `153c91d20` captured a pre-rustfmt state;
+  `cargo fmt --check` genuinely demands the wrapped form. Reverted, verified the
+  formatter's requirement independently, then applied it through the test-writer
+  channel and re-locked at `f2cd7859e`. No implementation iteration charged
+  because no assertion was weakened and the cause was formatting, not tampering.
+- Commits: tests `153c91d20`, fmt re-lock `f2cd7859e`, implementation `83e203d30`.
+- Open question passed to ticket 004: `missing_evidence` currently carries
+  human-readable labels ("graded-review shortfall", "coverage shortfall"). If 004
+  needs stable machine-readable keys or ftl-localised text, revisit these.

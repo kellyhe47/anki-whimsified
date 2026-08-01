@@ -1,11 +1,11 @@
 ---
 id: 002
 title: Topic evidence query (single SQL pass)
-status: pending
+status: tests-written
 depends_on: [001]
 touches: [web/rslib/src/readiness/evidence.rs, web/rslib/src/readiness/mod.rs]
 iterations: 0
-test_files: []
+test_files: [web/rslib/src/readiness/evidence_tests.rs]
 branch: ""
 ---
 
@@ -33,13 +33,36 @@ File: `web/rslib/src/readiness/evidence.rs`
 - [ ] A topic whose cards have never been reviewed reports `cards_with_history == 0` and `avg_retrievability` absent (NOT 0.0)
 - [ ] `graded_reviews` counts real graded reviews and EXCLUDES manual/rescheduled revlog entries
 - [ ] `avg_retrievability` is averaged only over cards that have FSRS memory state
-- [ ] Suspended cards are counted in `cards_total` but excluded from `graded_reviews`
+- [ ] ~~Suspended cards are counted in `cards_total` but excluded from `graded_reviews`~~
+      **CORRECTED:** Suspended cards are counted in `cards_total`, and their past
+      graded reviews STILL count in `graded_reviews`. Suspension affects future
+      scheduling, not study history already accumulated.
+- [ ] `cards_with_history` means ≥1 **graded** review; a card whose only revlog
+      entries are manual/rescheduled has NO history
 - [ ] Evidence gathering issues exactly ONE database query regardless of topic count
 
 ## Test plan
 
-Written by the test-writer agent. Build fixtures with `Collection::new()`,
-`NoteAdder::basic()`, and `col.answer_again()/answer_easy()` from
-`web/rslib/src/tests.rs`.
+Tests in `web/rslib/src/readiness/evidence_tests.rs`, declared from `mod.rs`.
+Fixtures via `Collection::new()`, `NoteAdder::basic()`, `col.answer_again()/answer_easy()`.
+The single-query criterion is enforced with rusqlite's `trace` hook, asserting both
+one statement AND that a 30-topic collection costs the same as a 1-topic one.
+
+## Deviations from the ticket as written
+
+- **Suspended-card criterion was wrong as authored and has been corrected above.**
+  Excluding a suspended card's past graded reviews would make `graded_reviews`
+  non-monotonic and let a learner fall back below the give-up rule's 200-review
+  threshold by suspending cards — i.e. the system would misreport how much study
+  evidence actually exists. Caught by the test-writer before implementation;
+  criterion corrected rather than the code bent to match it.
+- `cards_with_history` was ambiguous ("≥1 review"); pinned to ≥1 *graded* review
+  for consistency with `graded_reviews`.
+- **Anki canonifies a trailing-empty tag:** `mcat::` is stored as `mcat::blank`
+  (same mechanism pinned in `tags/register.rs`). So a "malformed" `mcat::` tag can
+  never reach the evidence query malformed — it arrives as a well-formed topic
+  named `blank`. Decision: do NOT special-case it. It surfaces as an unmapped
+  topic in ticket 005's coverage map, which reports unmapped topics separately
+  rather than dropping them silently.
 
 ## Attempt log
