@@ -16,3 +16,6 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+# local backend symlink for shared-engine build
+Anki-Android-Backend

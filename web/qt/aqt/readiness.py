@@ -191,7 +191,9 @@ class ScoreCard(QGroupBox):
         ]
         if score.reasons:
             html.append("<p style='margin-bottom: 2px;'><b>Why:</b></p>")
-            html.append(f"<ul style='margin-top: 0;'>{_bullets(list(score.reasons))}</ul>")
+            html.append(
+                f"<ul style='margin-top: 0;'>{_bullets(list(score.reasons))}</ul>"
+            )
         html.append(
             "<p style='margin-bottom: 2px;'>"
             f"Coverage: {score.coverage_pct:.1f}% of the AAMC outline<br>"
@@ -276,7 +278,9 @@ class ScoreCard(QGroupBox):
         ]
         if score.reasons:
             html.append("<p style='margin-bottom: 2px;'><b>Reasons:</b></p>")
-            html.append(f"<ul style='margin-top: 0;'>{_bullets(list(score.reasons))}</ul>")
+            html.append(
+                f"<ul style='margin-top: 0;'>{_bullets(list(score.reasons))}</ul>"
+            )
         return self._html_label("".join(html))
 
     def _html_label(self, html: str) -> QLabel:
@@ -458,7 +462,7 @@ class ReadinessDialog(QDialog):
             )
             table.setItem(row, 2, status)
         self._tidy_table(table, stretch_column=0)
-        table.setMinimumHeight(150)
+        self._fit_table_height(table)
         layout.addWidget(table)
 
         if readiness is None:
@@ -557,8 +561,12 @@ class ReadinessDialog(QDialog):
             table.setItem(row, 0, QTableWidgetItem(cat.section))
             table.setItem(row, 1, QTableWidgetItem(cat.id))
             name = QTableWidgetItem(cat.name)
+            # the column elides long category names, so the full text -- and
+            # the deck topics that mapped to it -- stay reachable
+            tooltip = cat.name
             if cat.topics:
-                name.setToolTip("Deck topics: " + ", ".join(cat.topics))
+                tooltip += "\n\nDeck topics: " + ", ".join(cat.topics)
+            name.setToolTip(tooltip)
             table.setItem(row, 2, name)
             covered = QTableWidgetItem("covered" if cat.covered else "NOT COVERED")
             covered.setForeground(
@@ -592,3 +600,13 @@ class ReadinessDialog(QDialog):
         header.setSectionResizeMode(stretch_column, QHeaderView.ResizeMode.Stretch)
         table.setAlternatingRowColors(True)
         table.setShowGrid(False)
+
+    def _fit_table_height(self, table: QTableWidget) -> None:
+        "Size a short table to its rows, so it does not sit in empty space."
+        header = table.horizontalHeader()
+        assert header is not None
+        height = header.height() + 2 * table.frameWidth()
+        for row in range(table.rowCount()):
+            height += table.rowHeight(row)
+        table.setFixedHeight(height)
+        table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
